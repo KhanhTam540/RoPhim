@@ -1,0 +1,83 @@
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const AppError = require('../utils/AppError');
+
+// Đảm bảo thư mục upload tồn tại
+const uploadDir = process.env.UPLOAD_PATH || 'uploads';
+const subDirs = ['avatars', 'posters', 'videos'];
+
+subDirs.forEach(dir => {
+  const dirPath = path.join(__dirname, '../../', uploadDir, dir);
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+});
+
+// Cấu hình storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    let subDir = 'others';
+    
+    // Xác định thư mục dựa vào fieldname
+    if (file.fieldname === 'avatar' || file.fieldname === 'avatars') {
+      subDir = 'avatars';
+    } else if (file.fieldname === 'poster' || file.fieldname === 'posters') {
+      subDir = 'posters';
+    } else if (file.fieldname === 'backdrop') {
+      subDir = 'posters';
+    } else if (file.fieldname === 'video' || file.fieldname === 'videos') {
+      subDir = 'videos';
+    }
+    
+    cb(null, path.join(__dirname, '../../', uploadDir, subDir));
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+  }
+});
+
+// Filter file
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = /jpeg|jpg|png|gif|webp/;
+  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = allowedTypes.test(file.mimetype);
+
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb(new AppError('Chỉ chấp nhận file ảnh (jpeg, jpg, png, gif, webp)', 400));
+  }
+};
+
+// Khởi tạo upload
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: parseInt(process.env.MAX_FILE_SIZE) || 5 * 1024 * 1024 // 5MB default
+  },
+  fileFilter
+});
+
+// Upload single file
+const uploadSingle = (fieldName) => upload.single(fieldName);
+
+// Upload multiple files
+const uploadMultiple = (fieldName, maxCount) => upload.array(fieldName, maxCount);
+
+// Upload fields
+const uploadFields = upload.fields([
+  { name: 'poster', maxCount: 1 },
+  { name: 'backdrop', maxCount: 1 },
+  { name: 'avatar', maxCount: 1 },
+  { name: 'thumbnail', maxCount: 1 }
+]);
+
+module.exports = {
+  upload,
+  uploadSingle,
+  uploadMultiple,
+  uploadFields
+};
