@@ -98,7 +98,7 @@ function App() {
                 <Route path="/dang-ky" element={<RegisterPage />} />
                 
                 {/* Protected User Routes */}
-                <Route path="/ho-so" element={
+                <Route path="/profile" element={
                   <PrivateRoute>
                     <ProfilePage />
                   </PrivateRoute>

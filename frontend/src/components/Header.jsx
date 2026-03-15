@@ -301,12 +301,22 @@ const Header = () => {
                     <p className="text-sm font-bold text-white truncate">{user?.fullName}</p>
                     <p className="text-[10px] text-red-500 font-bold tracking-widest uppercase">Thành viên</p>
                   </div>
+                  
+                  {/* SỬA QUAN TRỌNG: Đường dẫn "/profile" thay vì "/profile" sai */}
                   <UserMenuItem to="/profile" icon={<FaUser className="text-blue-400" />} text="Cá nhân" />
                   <UserMenuItem to="/favorites" icon={<FaHeart className="text-red-400" />} text="Yêu thích" />
                   <UserMenuItem to="/history" icon={<FaHistory className="text-green-400" />} text="Lịch sử" />
-                  {isAdmin && <UserMenuItem to="/admin" icon={<FaCog className="text-yellow-400" />} text="Admin Panel" />}
+                  
+                  {isAdmin && (
+                    <UserMenuItem to="/admin" icon={<FaCog className="text-yellow-400" />} text="Admin Panel" />
+                  )}
+                  
                   <div className="h-[1px] bg-white/5 my-1" />
-                  <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-red-600/10 transition-all">
+                  
+                  <button 
+                    onClick={logout} 
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-red-600/10 transition-all"
+                  >
                     <FaSignOutAlt /> Đăng xuất
                   </button>
                 </div>
@@ -401,10 +411,16 @@ const Header = () => {
               </div>
 
               {/* Mobile Auth */}
-              {!isAuthenticated && (
+              {!isAuthenticated ? (
                 <div className="mt-8">
                   <Link to="/dang-nhap" className="block w-full bg-red-600 text-white text-center py-3 rounded-xl font-bold">
                     Đăng nhập
+                  </Link>
+                </div>
+              ) : (
+                <div className="mt-8 space-y-2">
+                  <Link to="/profile" className="block w-full bg-red-600 text-white text-center py-3 rounded-xl font-bold">
+                    Cá nhân
                   </Link>
                 </div>
               )}
@@ -448,8 +464,12 @@ const DesktopDropdown = ({ label, items, type, columns, loading }) => (
   </div>
 )
 
+// Component UserMenuItem - ĐÃ SỬA ĐƯỜNG DẪN
 const UserMenuItem = ({ to, icon, text }) => (
-  <Link to={to} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-all group">
+  <Link 
+    to={to} 
+    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-all group"
+  >
     <span className="transition-transform group-hover:scale-110">{icon}</span>
     {text}
   </Link>

@@ -1,5 +1,5 @@
 // src/pages/MovieDetail.jsx
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { movieApi, ratingApi, favoriteApi } from '../api/auth'
@@ -25,9 +25,12 @@ import {
   FaEye,
   FaFilm,
   FaUser,
-  FaUsers
+  FaUsers,
+  FaInfoCircle,
+  FaTheaterMasks,
+  FaGlobe
 } from 'react-icons/fa'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 
 // ==================== UTILITY FUNCTIONS ====================
@@ -68,6 +71,7 @@ const MovieDetail = () => {
   const [showShareMenu, setShowShareMenu] = useState(false)
   const [activeTab, setActiveTab] = useState('overview')
   const [imageErrors, setImageErrors] = useState({})
+  const [trailerModal, setTrailerModal] = useState(false)
   
   // History states
   const [progress, setProgress] = useState(0)
@@ -94,7 +98,7 @@ const MovieDetail = () => {
             getUserRating(movie.id)
           ])
         } catch (error) {
-          console.error('Error loading user data:', error)
+          console.error('❌ Error loading user data:', error)
         }
       }
     }
@@ -119,7 +123,7 @@ const MovieDetail = () => {
         setLastSavedProgress(Math.round(progressDebounced))
       }
     }
-  }, [progressDebounced, movie?.id, selectedEpisode?.id, isAuthenticated])
+  }, [progressDebounced, movie?.id, selectedEpisode?.id, isAuthenticated, addToHistory, lastSavedProgress])
 
   // ==================== API CALLS ====================
   const loadMovieDetail = async () => {
@@ -209,20 +213,30 @@ const MovieDetail = () => {
   }
 
   const handleStartWatching = () => {
-    if (isAuthenticated && movie?.id) {
-      console.log('🎬 Started watching:', movie.title)
-      
-      // Lưu lịch sử khi bắt đầu xem
-      addToHistory({
-        movieId: movie.id,
-        episodeId: selectedEpisode?.id,
-        progress: 0,
-        completed: false
-      })
-      
-      setProgress(0)
-      setLastSavedProgress(0)
+    if (!isAuthenticated) {
+      toast.error('Vui lòng đăng nhập để xem phim')
+      return
     }
+
+    if (!movie?.id) {
+      console.error('❌ No movie ID')
+      return
+    }
+
+    console.log('🎬 Started watching:', { 
+      movieId: movie.id, 
+      title: movie.title 
+    })
+    
+    addToHistory({
+      movieId: movie.id,
+      episodeId: selectedEpisode?.id,
+      progress: 0,
+      completed: false
+    })
+    
+    setProgress(0)
+    setLastSavedProgress(0)
   }
 
   const handleProgress = (progressValue) => {
@@ -245,6 +259,14 @@ const MovieDetail = () => {
 
   const handleImageError = (type) => {
     setImageErrors(prev => ({ ...prev, [type]: true }))
+  }
+
+  const handleWatchTrailer = () => {
+    if (movie?.trailerUrl) {
+      setTrailerModal(true)
+    } else {
+      toast.error('Phim chưa có trailer')
+    }
   }
 
   // ==================== RENDER LOADING ====================
@@ -453,6 +475,16 @@ const MovieDetail = () => {
                   <span>{isFavorite ? 'Đã thích' : 'Yêu thích'}</span>
                 </button>
 
+                {movie.trailerUrl && (
+                  <button
+                    onClick={handleWatchTrailer}
+                    className="btn-secondary flex items-center gap-2 px-6 py-4"
+                  >
+                    <FaPlay />
+                    <span>Xem trailer</span>
+                  </button>
+                )}
+
                 {movie.videoUrl && (
                   <a
                     href={movie.videoUrl}
@@ -474,29 +506,32 @@ const MovieDetail = () => {
                     <span className="hidden md:inline">Chia sẻ</span>
                   </button>
 
-                  {showShareMenu && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="absolute bottom-full mb-2 left-0 bg-rophim-card border border-rophim-border rounded-lg shadow-xl p-2 min-w-[150px]"
-                    >
-                      <button
-                        onClick={handleShare}
-                        className="w-full text-left px-4 py-2 hover:bg-rophim-hover rounded-lg transition-colors"
+                  <AnimatePresence>
+                    {showShareMenu && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute bottom-full mb-2 left-0 bg-rophim-card border border-rophim-border rounded-lg shadow-xl p-2 min-w-[150px] z-50"
                       >
-                        Copy link
-                      </button>
-                      <a
-                        href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block w-full text-left px-4 py-2 hover:bg-rophim-hover rounded-lg transition-colors"
-                        onClick={() => setShowShareMenu(false)}
-                      >
-                        Chia sẻ Facebook
-                      </a>
-                    </motion.div>
-                  )}
+                        <button
+                          onClick={handleShare}
+                          className="w-full text-left px-4 py-2 hover:bg-rophim-hover rounded-lg transition-colors"
+                        >
+                          Copy link
+                        </button>
+                        <a
+                          href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block w-full text-left px-4 py-2 hover:bg-rophim-hover rounded-lg transition-colors"
+                          onClick={() => setShowShareMenu(false)}
+                        >
+                          Chia sẻ Facebook
+                        </a>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
 
@@ -534,7 +569,7 @@ const MovieDetail = () => {
         <div className="flex border-b border-rophim-border mb-8 overflow-x-auto">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`px-6 py-3 font-medium whitespace-nowrap ${
+            className={`px-6 py-3 font-medium whitespace-nowrap transition-colors ${
               activeTab === 'overview'
                 ? 'text-red-500 border-b-2 border-red-500'
                 : 'text-rophim-textSecondary hover:text-white'
@@ -545,7 +580,7 @@ const MovieDetail = () => {
           {movie.type === 'series' && movie.episodes?.length > 0 && (
             <button
               onClick={() => setActiveTab('episodes')}
-              className={`px-6 py-3 font-medium whitespace-nowrap ${
+              className={`px-6 py-3 font-medium whitespace-nowrap transition-colors ${
                 activeTab === 'episodes'
                   ? 'text-red-500 border-b-2 border-red-500'
                   : 'text-rophim-textSecondary hover:text-white'
@@ -556,7 +591,7 @@ const MovieDetail = () => {
           )}
           <button
             onClick={() => setActiveTab('cast')}
-            className={`px-6 py-3 font-medium whitespace-nowrap ${
+            className={`px-6 py-3 font-medium whitespace-nowrap transition-colors ${
               activeTab === 'cast'
                 ? 'text-red-500 border-b-2 border-red-500'
                 : 'text-rophim-textSecondary hover:text-white'
@@ -566,7 +601,7 @@ const MovieDetail = () => {
           </button>
           <button
             onClick={() => setActiveTab('reviews')}
-            className={`px-6 py-3 font-medium whitespace-nowrap ${
+            className={`px-6 py-3 font-medium whitespace-nowrap transition-colors ${
               activeTab === 'reviews'
                 ? 'text-red-500 border-b-2 border-red-500'
                 : 'text-rophim-textSecondary hover:text-white'
@@ -582,8 +617,10 @@ const MovieDetail = () => {
             {/* Overview Tab */}
             {activeTab === 'overview' && (
               <motion.div
+                key="overview"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 className="space-y-8"
               >
                 {/* Video Player for Single Movie */}
@@ -619,6 +656,7 @@ const MovieDetail = () => {
                           to={`/quoc-gia/${country.slug}`}
                           className="bg-rophim-card hover:bg-rophim-hover px-4 py-2 rounded-lg text-sm transition-colors"
                         >
+                          <FaGlobe className="inline mr-1 text-blue-500" />
                           {country.name}
                         </Link>
                       ))}
@@ -631,8 +669,10 @@ const MovieDetail = () => {
             {/* Episodes Tab */}
             {activeTab === 'episodes' && movie.type === 'series' && (
               <motion.div
+                key="episodes"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 id="episodes"
               >
                 <h2 className="text-2xl font-bold mb-4">Danh sách tập</h2>
@@ -675,8 +715,10 @@ const MovieDetail = () => {
             {/* Cast Tab */}
             {activeTab === 'cast' && (
               <motion.div
+                key="cast"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
               >
                 <h2 className="text-2xl font-bold mb-6">Diễn viên & Đạo diễn</h2>
                 
@@ -705,8 +747,8 @@ const MovieDetail = () => {
                               </span>
                             </div>
                           )}
-                          <div className="flex-1">
-                            <p className="font-medium group-hover:text-red-500 transition-colors">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium group-hover:text-red-500 transition-colors truncate">
                               {director.name}
                             </p>
                             <p className="text-xs text-rophim-textSecondary">Đạo diễn</p>
@@ -742,8 +784,8 @@ const MovieDetail = () => {
                               </span>
                             </div>
                           )}
-                          <div className="flex-1">
-                            <p className="font-medium group-hover:text-red-500 transition-colors">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium group-hover:text-red-500 transition-colors truncate">
                               {actor.name}
                             </p>
                             <p className="text-xs text-rophim-textSecondary">Diễn viên</p>
@@ -759,8 +801,10 @@ const MovieDetail = () => {
             {/* Reviews Tab */}
             {activeTab === 'reviews' && (
               <motion.div
+                key="reviews"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
               >
                 {/* Rating Section */}
                 <section className="mb-8">
@@ -828,7 +872,10 @@ const MovieDetail = () => {
           {/* Sidebar - Movie Info */}
           <div className="lg:col-span-1">
             <div className="bg-rophim-card rounded-2xl p-6 sticky top-24">
-              <h3 className="font-bold text-lg mb-4">Thông tin phim</h3>
+              <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                <FaInfoCircle className="text-blue-500" />
+                Thông tin phim
+              </h3>
               
               <ul className="space-y-4">
                 {movie.status && (
@@ -919,6 +966,40 @@ const MovieDetail = () => {
           />
         </div>
       )}
+
+      {/* Trailer Modal */}
+      <AnimatePresence>
+        {trailerModal && movie.trailerUrl && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+            onClick={() => setTrailerModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="relative w-full max-w-4xl aspect-video bg-black rounded-lg overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setTrailerModal(false)}
+                className="absolute top-4 right-4 text-white bg-black/50 hover:bg-black/70 rounded-full p-2 z-10"
+              >
+                ✕
+              </button>
+              <iframe
+                src={movie.trailerUrl.replace('watch?v=', 'embed/')}
+                className="w-full h-full"
+                allowFullScreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }

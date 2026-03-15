@@ -1,3 +1,4 @@
+// src/pages/ProfilePage.jsx
 import { useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { useAuth } from '../context/AuthContext'
@@ -5,6 +6,7 @@ import { userApi } from '../api/auth'
 import { motion } from 'framer-motion'
 import { FaUser, FaEnvelope, FaLock, FaCamera } from 'react-icons/fa'
 import toast from 'react-hot-toast'
+import { getAvatarUrl } from '../utils/imageUtils'
 
 const ProfilePage = () => {
   const { user, logout } = useAuth()
@@ -42,6 +44,7 @@ const ProfilePage = () => {
       toast.success('Cập nhật thông tin thành công')
     } catch (error) {
       console.error('Error updating profile:', error)
+      toast.error('Cập nhật thất bại')
     } finally {
       setLoading(false)
     }
@@ -52,6 +55,11 @@ const ProfilePage = () => {
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast.error('Mật khẩu xác nhận không khớp')
+      return
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      toast.error('Mật khẩu phải có ít nhất 6 ký tự')
       return
     }
 
@@ -70,6 +78,7 @@ const ProfilePage = () => {
       })
     } catch (error) {
       console.error('Error changing password:', error)
+      toast.error('Đổi mật khẩu thất bại')
     } finally {
       setLoading(false)
     }
@@ -84,15 +93,19 @@ const ProfilePage = () => {
       return
     }
 
+    const formData = new FormData()
+    formData.append('avatar', file)
+
     setAvatarLoading(true)
 
     try {
-      const response = await userApi.uploadAvatar(file)
+      await userApi.uploadAvatar(formData)
       toast.success('Cập nhật ảnh đại diện thành công')
       // Refresh user data
       window.location.reload()
     } catch (error) {
       console.error('Error uploading avatar:', error)
+      toast.error('Upload ảnh thất bại')
     } finally {
       setAvatarLoading(false)
     }
@@ -119,19 +132,19 @@ const ProfilePage = () => {
                 <div className="relative inline-block">
                   {user?.avatar ? (
                     <img
-                      src={`${import.meta.env.VITE_IMAGE_URL}/${user.avatar}`}
+                      src={getAvatarUrl(user.avatar)}
                       alt={user.fullName}
                       className="w-32 h-32 rounded-full object-cover border-4 border-rophim-border"
                     />
                   ) : (
-                    <div className="w-32 h-32 rounded-full bg-blue-600 mx-auto flex items-center justify-center text-4xl font-bold border-4 border-rophim-border">
-                      {user?.fullName?.charAt(0).toUpperCase()}
+                    <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 mx-auto flex items-center justify-center text-4xl font-bold border-4 border-rophim-border">
+                      {user?.fullName?.charAt(0).toUpperCase() || 'U'}
                     </div>
                   )}
                   
                   <label
                     htmlFor="avatar-upload"
-                    className="absolute bottom-0 right-0 bg-rophim-card hover:bg-rophim-hover p-2 rounded-full cursor-pointer border border-rophim-border"
+                    className="absolute bottom-0 right-0 bg-rophim-card hover:bg-rophim-hover p-2 rounded-full cursor-pointer border border-rophim-border transition-all hover:scale-110"
                   >
                     <FaCamera />
                     <input
@@ -168,7 +181,7 @@ const ProfilePage = () => {
               {/* Profile form */}
               <div className="bg-rophim-card rounded-lg p-6">
                 <h2 className="text-lg font-bold mb-4 flex items-center">
-                  <FaUser className="mr-2" /> Thông tin cá nhân
+                  <FaUser className="mr-2 text-blue-500" /> Thông tin cá nhân
                 </h2>
 
                 <form onSubmit={handleUpdateProfile} className="space-y-4">
@@ -190,12 +203,15 @@ const ProfilePage = () => {
                     <label className="block text-sm font-medium mb-2">
                       Email
                     </label>
-                    <input
-                      type="email"
-                      value={user?.email}
-                      className="input-field bg-rophim-hover"
-                      disabled
-                    />
+                    <div className="flex items-center gap-2">
+                      <FaEnvelope className="text-rophim-textSecondary" />
+                      <input
+                        type="email"
+                        value={user?.email}
+                        className="input-field bg-rophim-hover flex-1"
+                        disabled
+                      />
+                    </div>
                     <p className="text-xs text-rophim-textSecondary mt-1">
                       Email không thể thay đổi
                     </p>
@@ -214,7 +230,7 @@ const ProfilePage = () => {
               {/* Change password form */}
               <div className="bg-rophim-card rounded-lg p-6">
                 <h2 className="text-lg font-bold mb-4 flex items-center">
-                  <FaLock className="mr-2" /> Đổi mật khẩu
+                  <FaLock className="mr-2 text-red-500" /> Đổi mật khẩu
                 </h2>
 
                 <form onSubmit={handleChangePassword} className="space-y-4">

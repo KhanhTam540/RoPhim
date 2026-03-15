@@ -6,8 +6,13 @@ const { formatMoviesResponse, getPagination } = require('../utils/helpers');
 const AppError = require('../utils/AppError');
 const { Op } = require('sequelize');
 
-// Lấy lịch sử xem
-const getHistory = catchAsync(async (req, res) => {
+// Lấy lịch sử xem - SỬA: thêm tham số next
+const getHistory = catchAsync(async (req, res, next) => {
+  // Kiểm tra user đã đăng nhập chưa
+  if (!req.user || !req.user.id) {
+    return next(new AppError('Vui lòng đăng nhập', 401));
+  }
+
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 20;
   const offset = (page - 1) * limit;
@@ -38,7 +43,7 @@ const getHistory = catchAsync(async (req, res) => {
   });
 
   const historyList = histories
-    .filter(h => h.movie)
+    .filter(h => h.movie) // Chỉ lấy những record có movie
     .map(h => ({
       id: h.id,
       movie: formatMoviesResponse([h.movie], req)[0],
@@ -62,15 +67,33 @@ const getHistory = catchAsync(async (req, res) => {
 
 // Thêm vào lịch sử - UPSERT
 const addToHistory = catchAsync(async (req, res, next) => {
+  // 1. KIỂM TRA USER
+  if (!req.user || !req.user.id) {
+    return next(new AppError('Vui lòng đăng nhập', 401));
+  }
+
+  // 2. KIỂM TRA DỮ LIỆU ĐẦU VÀO
   const { movieId, episodeId, progress, completed } = req.body;
 
-  console.log('📝 Adding to history:', { userId: req.user.id, movieId, episodeId, progress, completed });
+  console.log('📝 Adding to history:', { 
+    userId: req.user.id, 
+    movieId, 
+    episodeId, 
+    progress, 
+    completed 
+  });
 
+  if (!movieId) {
+    return next(new AppError('movieId là bắt buộc', 400));
+  }
+
+  // 3. KIỂM TRA PHIM TỒN TẠI
   const movie = await Movie.findByPk(movieId);
   if (!movie) {
     return next(new AppError('Không tìm thấy phim', 404));
   }
 
+  // 4. KIỂM TRA TẬP PHIM (NẾU CÓ)
   if (episodeId) {
     const episode = await Episode.findOne({
       where: { id: episodeId, movie_id: movieId }
@@ -80,7 +103,7 @@ const addToHistory = catchAsync(async (req, res, next) => {
     }
   }
 
-  // Tìm bản ghi cũ
+  // 5. TÌM BẢN GHI CŨ
   let history = await History.findOne({
     where: {
       user_id: req.user.id,
@@ -89,6 +112,7 @@ const addToHistory = catchAsync(async (req, res, next) => {
     }
   });
 
+  // 6. XỬ LÝ CREATE/UPDATE
   if (history) {
     // CẬP NHẬT - nếu đã tồn tại
     history.watched_at = new Date();
@@ -109,6 +133,7 @@ const addToHistory = catchAsync(async (req, res, next) => {
     console.log('✅ Created new history:', history.id);
   }
 
+  // 7. TRẢ VỀ KẾT QUẢ
   successResponse(res, {
     history: {
       id: history.id,
@@ -121,12 +146,24 @@ const addToHistory = catchAsync(async (req, res, next) => {
 
 // Xóa một item khỏi lịch sử
 const removeFromHistory = catchAsync(async (req, res, next) => {
+  // Kiểm tra user
+  if (!req.user || !req.user.id) {
+    return next(new AppError('Vui lòng đăng nhập', 401));
+  }
+
   const { historyId } = req.params;
+
+  if (!historyId) {
+    return next(new AppError('historyId là bắt buộc', 400));
+  }
 
   console.log('🗑️ Removing history:', historyId, 'for user:', req.user.id);
 
   const result = await History.destroy({
-    where: { id: historyId, user_id: req.user.id }
+    where: { 
+      id: historyId, 
+      user_id: req.user.id 
+    }
   });
 
   if (result === 0) {
@@ -137,7 +174,12 @@ const removeFromHistory = catchAsync(async (req, res, next) => {
 });
 
 // Xóa toàn bộ lịch sử
-const clearHistory = catchAsync(async (req, res) => {
+const clearHistory = catchAsync(async (req, res, next) => {
+  // Kiểm tra user
+  if (!req.user || !req.user.id) {
+    return next(new AppError('Vui lòng đăng nhập', 401));
+  }
+
   console.log('🗑️ Clearing all history for user:', req.user.id);
 
   await History.destroy({ 
