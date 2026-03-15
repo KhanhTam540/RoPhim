@@ -1,14 +1,15 @@
 // src/pages/GenrePage.jsx
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { genreApi, movieApi } from '../api/auth'
 import MovieCard from '../components/MovieCard'
 import Loading from '../components/Loading'
 import { motion } from 'framer-motion'
 import { 
-  FaFilm, FaSort, FaFilter, FaTimes,
-  FaCalendar, FaStar, FaGlobe, FaTv
+  FaFilm, FaFilter, FaTimes,
+  FaCalendar, FaStar, FaGlobe, FaTv,
+  FaSortAmountDown, FaChevronDown, FaSearch
 } from 'react-icons/fa'
 
 const GenrePage = () => {
@@ -66,7 +67,7 @@ const GenrePage = () => {
     try {
       setLoading(true)
       
-      // Luôn load thông tin thể loại mới
+      // Load thông tin thể loại
       console.log('📦 Đang tải thông tin thể loại:', slug)
       const genreResponse = await genreApi.getGenreBySlug(slug)
       console.log('📦 Genre response:', genreResponse)
@@ -199,47 +200,71 @@ const GenrePage = () => {
           transition={{ duration: 0.5 }}
         >
           {/* Header với thông tin thể loại */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <span className="text-3xl">{genre ? getGenreIcon(genre.name) : '🎬'}</span>
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <span className="text-3xl">{genre ? getGenreIcon(genre.name) : '🎬'}</span>
+                </div>
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold flex items-center gap-2">
+                    {genre?.name || 'Đang tải...'}
+                    {total > 0 && (
+                      <span className="text-sm bg-purple-600 px-3 py-1 rounded-full">
+                        {total} phim
+                      </span>
+                    )}
+                  </h1>
+                  {genre?.description && (
+                    <p className="text-rophim-textSecondary mt-2 max-w-2xl">
+                      {genre.description}
+                    </p>
+                  )}
+                </div>
               </div>
-              <div>
-                <h1 className="text-3xl md:text-4xl font-bold">
-                  {genre?.name || 'Đang tải...'}
-                </h1>
-                {genre?.description && (
-                  <p className="text-rophim-textSecondary mt-1 max-w-2xl">
-                    {genre.description}
-                  </p>
-                )}
-              </div>
-            </div>
 
-            {/* Sort dropdown */}
-            <div className="flex items-center space-x-3 bg-rophim-card px-4 py-2 rounded-lg border border-rophim-border">
-              <FaSort className="text-rophim-textSecondary" />
-              <select
-                value={sortBy}
-                onChange={handleSortChange}
-                className="bg-transparent border-none text-sm focus:outline-none focus:ring-0 cursor-pointer"
+              {/* Nút mở filters trên mobile */}
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="md:hidden btn-secondary flex items-center space-x-2"
               >
-                <option value="latest">Mới nhất</option>
-                <option value="popular">Xem nhiều nhất</option>
-                <option value="rating">Đánh giá cao</option>
-                <option value="year_desc">Năm mới nhất</option>
-                <option value="title_asc">Tên A-Z</option>
-              </select>
+                <FaFilter />
+                <span>Lọc</span>
+              </button>
             </div>
 
-            {/* Nút mở filters trên mobile */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="md:hidden btn-secondary flex items-center space-x-2"
-            >
-              <FaFilter />
-              <span>Lọc</span>
-            </button>
+            {/* Sort và filter status */}
+            <div className="flex flex-wrap items-center gap-4 mt-4">
+              {/* Sort dropdown - FIXED */}
+              <div className="bg-rophim-card px-4 py-2 rounded-lg border border-rophim-border flex items-center space-x-2">
+                <FaSortAmountDown className="text-purple-500" />
+                <span className="text-rophim-textSecondary">Sắp xếp:</span>
+                <div className="relative">
+                  <select
+                    value={sortBy}
+                    onChange={handleSortChange}
+                    className="appearance-none bg-transparent text-white pr-8 py-1 focus:outline-none cursor-pointer"
+                    style={{ color: 'white' }}
+                  >
+                    <option value="latest" className="bg-gray-800 text-white">Mới nhất</option>
+                    <option value="popular" className="bg-gray-800 text-white">Xem nhiều</option>
+                    <option value="rating" className="bg-gray-800 text-white">Đánh giá cao</option>
+                    <option value="year_desc" className="bg-gray-800 text-white">Năm mới nhất</option>
+                    <option value="title_asc" className="bg-gray-800 text-white">Tên A-Z</option>
+                  </select>
+                  <FaChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-rophim-textSecondary pointer-events-none" size={12} />
+                </div>
+              </div>
+
+              {Object.values(filters).some(v => v) && (
+                <button
+                  onClick={clearFilters}
+                  className="text-red-500 hover:text-red-400 text-sm flex items-center gap-1 bg-rophim-card px-3 py-2 rounded-lg border border-rophim-border"
+                >
+                  <FaTimes size={12} /> Xóa bộ lọc
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -247,66 +272,90 @@ const GenrePage = () => {
             <div className="hidden md:block md:col-span-1">
               <div className="bg-rophim-card rounded-lg p-6 border border-rophim-border sticky top-24">
                 <h3 className="text-lg font-bold mb-4 flex items-center">
-                  <FaFilter className="mr-2 text-blue-500" />
+                  <FaFilter className="mr-2 text-purple-500" />
                   Bộ lọc
                 </h3>
 
                 {/* Filter by year */}
                 <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Năm phát hành</label>
-                  <select
-                    value={filters.year}
-                    onChange={(e) => handleFilterChange('year', e.target.value)}
-                    className="input-field w-full"
-                  >
-                    <option value="">Tất cả năm</option>
-                    {years.map(year => (
-                      <option key={year} value={year}>{year}</option>
-                    ))}
-                  </select>
+                  <label className="block text-sm font-medium mb-2 text-rophim-textSecondary">Năm phát hành</label>
+                  <div className="relative">
+                    <select
+                      value={filters.year}
+                      onChange={(e) => handleFilterChange('year', e.target.value)}
+                      className="w-full bg-rophim-background border border-rophim-border rounded-lg px-4 py-2.5 text-white appearance-none cursor-pointer focus:border-purple-500 focus:outline-none"
+                    >
+                      <option value="" className="bg-gray-800 text-white">Tất cả năm</option>
+                      {years.map(year => (
+                        <option key={year} value={year} className="bg-gray-800 text-white">{year}</option>
+                      ))}
+                    </select>
+                    <FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-rophim-textSecondary pointer-events-none" size={14} />
+                  </div>
+                </div>
+
+                {/* Filter by country */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-2 text-rophim-textSecondary">Quốc gia</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Nhập quốc gia..."
+                      value={filters.country}
+                      onChange={(e) => handleFilterChange('country', e.target.value)}
+                      className="w-full bg-rophim-background border border-rophim-border rounded-lg px-4 py-2.5 text-white placeholder-rophim-textSecondary focus:border-purple-500 focus:outline-none"
+                    />
+                    <FaSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-rophim-textSecondary" size={14} />
+                  </div>
                 </div>
 
                 {/* Filter by quality */}
                 <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Chất lượng</label>
-                  <select
-                    value={filters.quality}
-                    onChange={(e) => handleFilterChange('quality', e.target.value)}
-                    className="input-field w-full"
-                  >
-                    <option value="">Tất cả</option>
-                    {qualities.map(quality => (
-                      <option key={quality} value={quality}>{quality}</option>
-                    ))}
-                  </select>
+                  <label className="block text-sm font-medium mb-2 text-rophim-textSecondary">Chất lượng</label>
+                  <div className="relative">
+                    <select
+                      value={filters.quality}
+                      onChange={(e) => handleFilterChange('quality', e.target.value)}
+                      className="w-full bg-rophim-background border border-rophim-border rounded-lg px-4 py-2.5 text-white appearance-none cursor-pointer focus:border-purple-500 focus:outline-none"
+                    >
+                      <option value="" className="bg-gray-800 text-white">Tất cả</option>
+                      {qualities.map(quality => (
+                        <option key={quality} value={quality} className="bg-gray-800 text-white">{quality}</option>
+                      ))}
+                    </select>
+                    <FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-rophim-textSecondary pointer-events-none" size={14} />
+                  </div>
                 </div>
 
                 {/* Filter by type */}
                 <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Loại phim</label>
-                  <select
-                    value={filters.type}
-                    onChange={(e) => handleFilterChange('type', e.target.value)}
-                    className="input-field w-full"
-                  >
-                    <option value="">Tất cả</option>
-                    {types.map(type => (
-                      <option key={type.value} value={type.value}>{type.label}</option>
-                    ))}
-                  </select>
+                  <label className="block text-sm font-medium mb-2 text-rophim-textSecondary">Loại phim</label>
+                  <div className="relative">
+                    <select
+                      value={filters.type}
+                      onChange={(e) => handleFilterChange('type', e.target.value)}
+                      className="w-full bg-rophim-background border border-rophim-border rounded-lg px-4 py-2.5 text-white appearance-none cursor-pointer focus:border-purple-500 focus:outline-none"
+                    >
+                      <option value="" className="bg-gray-800 text-white">Tất cả</option>
+                      {types.map(type => (
+                        <option key={type.value} value={type.value} className="bg-gray-800 text-white">{type.label}</option>
+                      ))}
+                    </select>
+                    <FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-rophim-textSecondary pointer-events-none" size={14} />
+                  </div>
                 </div>
 
                 {/* Filter buttons */}
                 <div className="flex space-x-2 mt-6">
                   <button
                     onClick={applyFilters}
-                    className="btn-primary flex-1"
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-200"
                   >
                     Áp dụng
                   </button>
                   <button
                     onClick={clearFilters}
-                    className="btn-secondary px-4"
+                    className="bg-rophim-background border border-rophim-border hover:border-red-500 text-rophim-textSecondary hover:text-red-500 px-4 py-2.5 rounded-lg transition-all duration-200"
                     title="Xóa bộ lọc"
                   >
                     <FaTimes />
@@ -318,16 +367,14 @@ const GenrePage = () => {
             {/* Main content - Movies grid */}
             <div className="md:col-span-3">
               {/* Kết quả tìm thấy */}
-              {total > 0 && (
-                <div className="mb-6 p-4 bg-rophim-card rounded-lg border border-rophim-border">
-                  <p className="text-rophim-textSecondary">
-                    Tìm thấy <span className="text-white font-bold text-lg">{total}</span> phim
-                    {Object.values(filters).some(v => v) && (
-                      <span className="ml-2 text-blue-500">(đã lọc)</span>
-                    )}
-                  </p>
-                </div>
-              )}
+              <div className="mb-6 p-4 bg-rophim-card rounded-lg border border-rophim-border">
+                <p className="text-rophim-textSecondary">
+                  Tìm thấy <span className="text-white font-bold text-lg">{total}</span> phim
+                  {Object.values(filters).some(v => v) && (
+                    <span className="ml-2 text-purple-500">(đã lọc)</span>
+                  )}
+                </p>
+              </div>
 
               {/* Movies grid */}
               {movies.length > 0 ? (
@@ -344,7 +391,7 @@ const GenrePage = () => {
                       <button
                         onClick={handleLoadMore}
                         disabled={loading}
-                        className="btn-secondary px-8 py-3 text-lg hover:scale-105 transition-transform"
+                        className="bg-rophim-card border border-rophim-border hover:border-purple-500 text-white font-medium px-8 py-3 rounded-lg hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {loading ? (
                           <span className="flex items-center space-x-2">
@@ -369,7 +416,7 @@ const GenrePage = () => {
                   </p>
                   <button
                     onClick={clearFilters}
-                    className="btn-primary"
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium px-6 py-3 rounded-lg transition-all duration-200"
                   >
                     Xóa bộ lọc
                   </button>
@@ -377,93 +424,6 @@ const GenrePage = () => {
               )}
             </div>
           </div>
-
-          {/* Mobile Filters Modal */}
-          {showFilters && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-50 md:hidden"
-              onClick={() => setShowFilters(false)}
-            >
-              <motion.div
-                initial={{ y: '100%' }}
-                animate={{ y: 0 }}
-                exit={{ y: '100%' }}
-                transition={{ type: 'tween' }}
-                className="absolute bottom-0 left-0 right-0 bg-rophim-card rounded-t-2xl p-6"
-                onClick={e => e.stopPropagation()}
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-bold">Bộ lọc</h3>
-                  <button onClick={() => setShowFilters(false)}>
-                    <FaTimes />
-                  </button>
-                </div>
-
-                {/* Filter by year */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Năm phát hành</label>
-                  <select
-                    value={filters.year}
-                    onChange={(e) => handleFilterChange('year', e.target.value)}
-                    className="input-field w-full"
-                  >
-                    <option value="">Tất cả năm</option>
-                    {years.map(year => (
-                      <option key={year} value={year}>{year}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Filter by quality */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Chất lượng</label>
-                  <select
-                    value={filters.quality}
-                    onChange={(e) => handleFilterChange('quality', e.target.value)}
-                    className="input-field w-full"
-                  >
-                    <option value="">Tất cả</option>
-                    {qualities.map(quality => (
-                      <option key={quality} value={quality}>{quality}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Filter by type */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Loại phim</label>
-                  <select
-                    value={filters.type}
-                    onChange={(e) => handleFilterChange('type', e.target.value)}
-                    className="input-field w-full"
-                  >
-                    <option value="">Tất cả</option>
-                    {types.map(type => (
-                      <option key={type.value} value={type.value}>{type.label}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex space-x-2 mt-6">
-                  <button
-                    onClick={applyFilters}
-                    className="btn-primary flex-1"
-                  >
-                    Áp dụng
-                  </button>
-                  <button
-                    onClick={clearFilters}
-                    className="btn-secondary px-4"
-                  >
-                    <FaTimes />
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
         </motion.div>
       </div>
     </>

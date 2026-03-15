@@ -6,7 +6,10 @@ import { searchApi } from '../api/auth'
 import MovieCard from '../components/MovieCard'
 import Loading from '../components/Loading'
 import { motion } from 'framer-motion'
-import { FaFilm, FaUser, FaUsers, FaSort } from 'react-icons/fa'
+import { 
+  FaFilm, FaUser, FaVideo, FaSearch, 
+  FaTimes, FaChevronDown, FaSortAmountDown
+} from 'react-icons/fa'
 import { getImageUrl } from '../utils/imageUtils'
 
 const SearchPage = () => {
@@ -18,7 +21,17 @@ const SearchPage = () => {
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(false)
   const [total, setTotal] = useState(0)
+  const [sortBy, setSortBy] = useState('latest')
   const [activeTab, setActiveTab] = useState('all') // 'all', 'movies', 'actors', 'directors'
+
+  // Danh sách sort options
+  const sortOptions = [
+    { value: 'latest', label: 'Mới nhất' },
+    { value: 'popular', label: 'Xem nhiều' },
+    { value: 'rating', label: 'Đánh giá cao' },
+    { value: 'year_desc', label: 'Năm mới nhất' },
+    { value: 'title_asc', label: 'Tên A-Z' }
+  ]
 
   // Reset khi keyword thay đổi
   useEffect(() => {
@@ -28,37 +41,31 @@ const SearchPage = () => {
     setActiveTab('all')
   }, [keyword])
 
-  // Load dữ liệu
   useEffect(() => {
     if (keyword) {
       performSearch()
     }
-  }, [keyword, page])
+  }, [keyword, page, sortBy])
 
   const performSearch = async () => {
     try {
       setLoading(true)
-      console.log('🔍 Searching for:', keyword, 'page:', page)
-      
       const response = await searchApi.search({ 
         keyword, 
         page, 
-        limit: 20 
+        limit: 20,
+        sort: sortBy
       })
       
       console.log('📦 Search response:', response)
 
       const { movies, actors, directors, pagination } = response.data
       
-      if (page === 1) {
-        setResults({ movies, actors, directors })
-      } else {
-        setResults(prev => ({
-          movies: [...(prev?.movies || []), ...movies],
-          actors: [...(prev?.actors || []), ...actors],
-          directors: [...(prev?.directors || []), ...directors],
-        }))
-      }
+      setResults(prev => ({
+        movies: page === 1 ? movies : [...(prev?.movies || []), ...movies],
+        actors: page === 1 ? actors : [...(prev?.actors || []), ...actors],
+        directors: page === 1 ? directors : [...(prev?.directors || []), ...directors],
+      }))
       
       const totalCount = (movies?.length || 0) + (actors?.length || 0) + (directors?.length || 0)
       setTotal(pagination?.total || totalCount)
@@ -72,39 +79,35 @@ const SearchPage = () => {
   }
 
   const handleLoadMore = () => {
-    setPage(p => p + 1)
+    setPage(prev => prev + 1)
   }
 
-  // Lọc kết quả theo tab
-  const getFilteredResults = () => {
-    if (!results) return { movies: [], actors: [], directors: [] }
-    
+  const handleSortChange = (e) => {
+    setSortBy(e.target.value)
+    setPage(1)
+  }
+
+  const getActiveCount = () => {
+    if (!results) return 0
     switch(activeTab) {
-      case 'movies':
-        return { movies: results.movies || [], actors: [], directors: [] }
-      case 'actors':
-        return { movies: [], actors: results.actors || [], directors: [] }
-      case 'directors':
-        return { movies: [], actors: [], directors: results.directors || [] }
-      default:
-        return results
+      case 'movies': return results.movies?.length || 0
+      case 'actors': return results.actors?.length || 0
+      case 'directors': return results.directors?.length || 0
+      default: 
+        return (results.movies?.length || 0) + 
+               (results.actors?.length || 0) + 
+               (results.directors?.length || 0)
     }
   }
 
-  const filteredResults = getFilteredResults()
-  const hasMovies = filteredResults.movies?.length > 0
-  const hasActors = filteredResults.actors?.length > 0
-  const hasDirectors = filteredResults.directors?.length > 0
-  const hasAnyResults = hasMovies || hasActors || hasDirectors
-
   if (!keyword) {
     return (
-      <div className="container-custom py-12 text-center">
-        <div className="bg-rophim-card rounded-lg border border-rophim-border p-12">
-          <FaFilm className="mx-auto text-6xl text-rophim-textSecondary mb-4" />
+      <div className="container-custom py-16 text-center">
+        <div className="max-w-md mx-auto">
+          <FaSearch className="mx-auto text-6xl text-rophim-textSecondary mb-4" />
           <h2 className="text-2xl font-bold mb-2">Nhập từ khóa tìm kiếm</h2>
           <p className="text-rophim-textSecondary">
-            Tìm kiếm phim, diễn viên, đạo diễn theo tên
+            Tìm kiếm phim, diễn viên, đạo diễn yêu thích của bạn
           </p>
         </div>
       </div>
@@ -115,7 +118,6 @@ const SearchPage = () => {
     <>
       <Helmet>
         <title>Tìm kiếm: {keyword} - RoPhim</title>
-        <meta name="description" content={`Kết quả tìm kiếm cho "${keyword}" trên RoPhim`} />
       </Helmet>
 
       <div className="container-custom py-8">
@@ -126,79 +128,135 @@ const SearchPage = () => {
           transition={{ duration: 0.5 }}
         >
           {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">
-                Kết quả tìm kiếm
-              </h1>
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <FaSearch className="text-3xl text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold">
+                    Kết quả tìm kiếm
+                  </h1>
+                  <p className="text-rophim-textSecondary mt-2">
+                    Từ khóa: <span className="text-white font-medium">"{keyword}"</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Sort dropdown - FIXED */}
+              <div className="hidden md:flex bg-rophim-card px-4 py-2 rounded-lg border border-rophim-border items-center space-x-2">
+                <FaSortAmountDown className="text-blue-500" />
+                <span className="text-rophim-textSecondary">Sắp xếp:</span>
+                <div className="relative">
+                  <select
+                    value={sortBy}
+                    onChange={handleSortChange}
+                    className="appearance-none bg-transparent text-white pr-8 py-1 focus:outline-none cursor-pointer"
+                    style={{ color: 'white' }}
+                  >
+                    {sortOptions.map(option => (
+                      <option key={option.value} value={option.value} className="bg-gray-800 text-white">
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <FaChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-rophim-textSecondary pointer-events-none" size={12} />
+                </div>
+              </div>
+            </div>
+
+            {/* Kết quả tìm thấy */}
+            <div className="mb-6 p-4 bg-rophim-card rounded-lg border border-rophim-border">
               <p className="text-rophim-textSecondary">
-                Từ khóa: <span className="text-white font-medium">"{keyword}"</span>
-                {total > 0 && (
-                  <span className="ml-2">- Tìm thấy <span className="text-blue-500 font-bold">{total}</span> kết quả</span>
-                )}
+                Tìm thấy <span className="text-white font-bold text-lg">{total}</span> kết quả
               </p>
             </div>
-          </div>
 
-          {/* Tabs */}
-          {results && (
-            <div className="flex space-x-1 mb-6 bg-rophim-card p-1 rounded-lg border border-rophim-border">
-              <button
-                onClick={() => setActiveTab('all')}
-                className={`flex-1 py-2 px-4 rounded-lg transition-colors ${
-                  activeTab === 'all' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'hover:bg-rophim-border text-rophim-textSecondary'
-                }`}
-              >
-                Tất cả ({Object.values(results).flat().length})
-              </button>
-              <button
-                onClick={() => setActiveTab('movies')}
-                className={`flex-1 py-2 px-4 rounded-lg transition-colors ${
-                  activeTab === 'movies' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'hover:bg-rophim-border text-rophim-textSecondary'
-                }`}
-              >
-                Phim ({results.movies?.length || 0})
-              </button>
-              <button
-                onClick={() => setActiveTab('actors')}
-                className={`flex-1 py-2 px-4 rounded-lg transition-colors ${
-                  activeTab === 'actors' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'hover:bg-rophim-border text-rophim-textSecondary'
-                }`}
-              >
-                Diễn viên ({results.actors?.length || 0})
-              </button>
-              <button
-                onClick={() => setActiveTab('directors')}
-                className={`flex-1 py-2 px-4 rounded-lg transition-colors ${
-                  activeTab === 'directors' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'hover:bg-rophim-border text-rophim-textSecondary'
-                }`}
-              >
-                Đạo diễn ({results.directors?.length || 0})
-              </button>
+            {/* Sort trên mobile */}
+            <div className="md:hidden mb-4">
+              <div className="bg-rophim-card px-4 py-2 rounded-lg border border-rophim-border flex items-center space-x-2 w-full">
+                <FaSortAmountDown className="text-blue-500" />
+                <span className="text-rophim-textSecondary">Sắp xếp:</span>
+                <div className="relative flex-1">
+                  <select
+                    value={sortBy}
+                    onChange={handleSortChange}
+                    className="appearance-none bg-transparent text-white w-full pr-8 py-1 focus:outline-none cursor-pointer"
+                    style={{ color: 'white' }}
+                  >
+                    {sortOptions.map(option => (
+                      <option key={option.value} value={option.value} className="bg-gray-800 text-white">
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <FaChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-rophim-textSecondary pointer-events-none" size={12} />
+                </div>
+              </div>
             </div>
-          )}
+
+            {/* Tabs */}
+            {results && (
+              <div className="flex flex-wrap gap-2 mb-6">
+                <button
+                  onClick={() => setActiveTab('all')}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    activeTab === 'all' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-rophim-card text-rophim-textSecondary hover:text-white border border-rophim-border'
+                  }`}
+                >
+                  Tất cả ({total})
+                </button>
+                <button
+                  onClick={() => setActiveTab('movies')}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    activeTab === 'movies' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-rophim-card text-rophim-textSecondary hover:text-white border border-rophim-border'
+                  }`}
+                >
+                  Phim ({results.movies?.length || 0})
+                </button>
+                <button
+                  onClick={() => setActiveTab('actors')}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    activeTab === 'actors' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-rophim-card text-rophim-textSecondary hover:text-white border border-rophim-border'
+                  }`}
+                >
+                  Diễn viên ({results.actors?.length || 0})
+                </button>
+                <button
+                  onClick={() => setActiveTab('directors')}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    activeTab === 'directors' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-rophim-card text-rophim-textSecondary hover:text-white border border-rophim-border'
+                  }`}
+                >
+                  Đạo diễn ({results.directors?.length || 0})
+                </button>
+              </div>
+            )}
+          </div>
 
           {loading && page === 1 ? (
             <Loading />
           ) : (
             <>
               {/* Movies */}
-              {hasMovies && (
+              {(!results || activeTab === 'all' || activeTab === 'movies') && 
+               results?.movies?.length > 0 && (
                 <section className="mb-8">
-                  <h2 className="text-xl font-bold mb-4 flex items-center">
-                    <FaFilm className="mr-2 text-blue-500" />
-                    Phim
+                  <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <FaFilm className="text-blue-500" />
+                    Phim ({results.movies.length})
                   </h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
-                    {filteredResults.movies.map(movie => (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {results.movies.map(movie => (
                       <MovieCard key={movie.id} movie={movie} />
                     ))}
                   </div>
@@ -206,38 +264,41 @@ const SearchPage = () => {
               )}
 
               {/* Actors */}
-              {hasActors && (
+              {(!results || activeTab === 'all' || activeTab === 'actors') && 
+               results?.actors?.length > 0 && (
                 <section className="mb-8">
-                  <h2 className="text-xl font-bold mb-4 flex items-center">
-                    <FaUsers className="mr-2 text-green-500" />
-                    Diễn viên
+                  <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <FaUser className="text-green-500" />
+                    Diễn viên ({results.actors.length})
                   </h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                    {filteredResults.actors.map(actor => (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {results.actors.map(actor => (
                       <Link
                         key={actor.id}
                         to={`/actors/${actor.slug}`}
-                        className="bg-rophim-card rounded-lg p-4 border border-rophim-border hover:border-blue-500 transition-colors group"
+                        className="group"
                       >
                         <div className="text-center">
-                          {actor.avatar ? (
-                            <img
-                              src={getImageUrl(actor.avatar)}
-                              alt={actor.name}
-                              className="w-24 h-24 rounded-full mx-auto mb-3 object-cover group-hover:scale-105 transition-transform"
-                            />
-                          ) : (
-                            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 mx-auto mb-3 flex items-center justify-center group-hover:scale-105 transition-transform">
-                              <span className="text-3xl font-bold text-white">
-                                {actor.name.charAt(0).toUpperCase()}
-                              </span>
-                            </div>
-                          )}
+                          <div className="relative w-32 h-32 mx-auto mb-3">
+                            {actor.avatar ? (
+                              <img
+                                src={getImageUrl(actor.avatar)}
+                                alt={actor.name}
+                                className="w-full h-full rounded-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                            ) : (
+                              <div className="w-full h-full rounded-full bg-gradient-to-br from-green-600 to-teal-600 flex items-center justify-center">
+                                <span className="text-4xl font-bold text-white">
+                                  {actor.name?.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                            )}
+                          </div>
                           <h3 className="font-medium group-hover:text-blue-500 transition-colors">
                             {actor.name}
                           </h3>
                           {actor.nationality && (
-                            <p className="text-sm text-rophim-textSecondary mt-1">
+                            <p className="text-sm text-rophim-textSecondary">
                               {actor.nationality}
                             </p>
                           )}
@@ -249,38 +310,41 @@ const SearchPage = () => {
               )}
 
               {/* Directors */}
-              {hasDirectors && (
+              {(!results || activeTab === 'all' || activeTab === 'directors') && 
+               results?.directors?.length > 0 && (
                 <section className="mb-8">
-                  <h2 className="text-xl font-bold mb-4 flex items-center">
-                    <FaUsers className="mr-2 text-purple-500" />
-                    Đạo diễn
+                  <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <FaVideo className="text-purple-500" />
+                    Đạo diễn ({results.directors.length})
                   </h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                    {filteredResults.directors.map(director => (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {results.directors.map(director => (
                       <Link
                         key={director.id}
                         to={`/directors/${director.slug}`}
-                        className="bg-rophim-card rounded-lg p-4 border border-rophim-border hover:border-blue-500 transition-colors group"
+                        className="group"
                       >
                         <div className="text-center">
-                          {director.avatar ? (
-                            <img
-                              src={getImageUrl(director.avatar)}
-                              alt={director.name}
-                              className="w-24 h-24 rounded-full mx-auto mb-3 object-cover group-hover:scale-105 transition-transform"
-                            />
-                          ) : (
-                            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 mx-auto mb-3 flex items-center justify-center group-hover:scale-105 transition-transform">
-                              <span className="text-3xl font-bold text-white">
-                                {director.name.charAt(0).toUpperCase()}
-                              </span>
-                            </div>
-                          )}
+                          <div className="relative w-32 h-32 mx-auto mb-3">
+                            {director.avatar ? (
+                              <img
+                                src={getImageUrl(director.avatar)}
+                                alt={director.name}
+                                className="w-full h-full rounded-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                            ) : (
+                              <div className="w-full h-full rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+                                <span className="text-4xl font-bold text-white">
+                                  {director.name?.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                            )}
+                          </div>
                           <h3 className="font-medium group-hover:text-blue-500 transition-colors">
                             {director.name}
                           </h3>
                           {director.nationality && (
-                            <p className="text-sm text-rophim-textSecondary mt-1">
+                            <p className="text-sm text-rophim-textSecondary">
                               {director.nationality}
                             </p>
                           )}
@@ -291,26 +355,31 @@ const SearchPage = () => {
                 </section>
               )}
 
-              {/* No results */}
-              {!hasAnyResults && !loading && (
+              {(!results || 
+                (activeTab === 'all' && 
+                 !results?.movies?.length && 
+                 !results?.actors?.length && 
+                 !results?.directors?.length) ||
+                (activeTab === 'movies' && !results?.movies?.length) ||
+                (activeTab === 'actors' && !results?.actors?.length) ||
+                (activeTab === 'directors' && !results?.directors?.length)) && (
                 <div className="text-center py-16 bg-rophim-card rounded-lg border border-rophim-border">
-                  <FaFilm className="mx-auto text-6xl text-rophim-textSecondary mb-4" />
+                  <FaSearch className="mx-auto text-6xl text-rophim-textSecondary mb-4" />
                   <p className="text-xl text-rophim-textSecondary mb-2">
-                    Không tìm thấy kết quả nào cho "{keyword}"
+                    Không tìm thấy kết quả nào
                   </p>
                   <p className="text-sm text-rophim-textSecondary">
-                    Thử tìm kiếm với từ khóa khác hoặc kiểm tra lại chính tả
+                    Thử tìm kiếm với từ khóa khác
                   </p>
                 </div>
               )}
 
-              {/* Load more button */}
-              {hasMore && (
-                <div className="text-center mt-10">
+              {hasMore && getActiveCount() > 0 && (
+                <div className="text-center mt-8">
                   <button
                     onClick={handleLoadMore}
                     disabled={loading}
-                    className="btn-secondary px-8 py-3 text-lg hover:scale-105 transition-transform"
+                    className="bg-rophim-card border border-rophim-border hover:border-blue-500 text-white font-medium px-8 py-3 rounded-lg hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? (
                       <span className="flex items-center space-x-2">
@@ -318,7 +387,7 @@ const SearchPage = () => {
                         <span>Đang tải...</span>
                       </span>
                     ) : (
-                      <span>Xem thêm kết quả</span>
+                      <span>Xem thêm</span>
                     )}
                   </button>
                 </div>
