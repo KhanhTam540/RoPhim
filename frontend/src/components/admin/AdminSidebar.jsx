@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { 
   FaHome, FaFilm, FaList, FaGlobe, FaUser, 
   FaUsers, FaImage, FaCog, FaSignOutAlt,
-  FaStar, FaVideo, FaChartBar 
+  FaStar, FaVideo
 } from 'react-icons/fa'
 import { useAuth } from '../../context/AuthContext'
 import toast from 'react-hot-toast'
@@ -32,10 +32,17 @@ const AdminSidebar = () => {
 
   return (
     <div className="w-64 bg-rophim-card h-screen fixed left-0 top-0 overflow-y-auto border-r border-rophim-border">
-      {/* Logo */}
+      {/* Logo - Chỉ giữ một logo đơn giản */}
       <div className="p-4 border-b border-rophim-border">
-        <h1 className="text-xl font-bold text-blue-500">RoPhim Admin</h1>
-        <p className="text-xs text-rophim-textSecondary mt-1">Quản lý hệ thống</p>
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-gradient-to-br from-red-600 to-red-800 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-lg">R</span>
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-white">RoPhim</h1>
+            <p className="text-xs text-rophim-textSecondary">Admin</p>
+          </div>
+        </div>
       </div>
 
       {/* Menu */}
@@ -49,7 +56,7 @@ const AdminSidebar = () => {
                 className={({ isActive }) =>
                   `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
                     isActive 
-                      ? 'bg-blue-600 text-white' 
+                      ? 'bg-red-600 text-white' 
                       : 'text-rophim-textSecondary hover:bg-rophim-hover hover:text-white'
                   }`
                 }
@@ -62,22 +69,11 @@ const AdminSidebar = () => {
         </ul>
       </nav>
 
-      {/* User info */}
-      <div className="px-4 py-3 border-t border-rophim-border">
-        <div className="flex items-center space-x-3 mb-3">
-          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
-            <FaUser size={14} />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-medium">Admin</p>
-            <p className="text-xs text-rophim-textSecondary">Quản trị viên</p>
-          </div>
-        </div>
-        
-        {/* Logout button */}
+      {/* Logout button */}
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-rophim-border">
         <button
           onClick={handleLogout}
-          className="flex items-center space-x-3 px-4 py-2 w-full rounded-lg text-rophim-textSecondary hover:bg-rophim-hover hover:text-white transition-colors"
+          className="flex items-center space-x-3 px-4 py-3 w-full rounded-lg text-rophim-textSecondary hover:bg-rophim-hover hover:text-white transition-colors"
         >
           <FaSignOutAlt size={18} />
           <span>Đăng xuất</span>

@@ -1,9 +1,30 @@
-const { Movie, Genre, Country, Director, Actor, Episode, Rating, sequelize } = require('../models');
+const { 
+  Movie, 
+  Genre, 
+  Country, 
+  Director, 
+  Actor, 
+  Episode, 
+  Rating,
+  MovieGenre,  // Import trực tiếp junction model
+  MovieCountry,
+  sequelize 
+} = require('../models');
 const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
 const { successResponse } = require('../utils/responseHandler');
 const { formatMovieResponse, formatMoviesResponse, getPagination } = require('../utils/helpers');
 const { Op } = require('sequelize');
+
+// KIỂM TRA MODEL
+console.log('🔍 MovieController - Checking models:', {
+  Movie: !!Movie,
+  Genre: !!Genre,
+  Country: !!Country,
+  MovieGenre: !!MovieGenre,
+  MovieCountry: !!MovieCountry,
+  sequelize: !!sequelize
+});
 
 // Lấy danh sách phim
 const getMovies = catchAsync(async (req, res) => {
@@ -11,7 +32,13 @@ const getMovies = catchAsync(async (req, res) => {
   const limit = parseInt(req.query.limit) || 20;
   const offset = (page - 1) * limit;
 
-  const where = { isActive: true };
+  // Điều kiện where cơ bản
+  const where = { is_active: true };
+  
+  // Log request
+  console.log('🔍 ===== MOVIE API CALL =====');
+  console.log('🔍 Request query:', req.query);
+
   const include = [
     { 
       model: Genre, 
@@ -27,57 +54,143 @@ const getMovies = catchAsync(async (req, res) => {
     }
   ];
 
-  // Filter theo thể loại
+  // FILTER THEO THỂ LOẠI
   if (req.query.genre) {
-    include[0].where = { slug: req.query.genre };
-    include[0].required = true;
+    console.log('🎬 Filtering by genre slug:', req.query.genre);
+    
+    // Tìm genre theo slug
+    const genre = await Genre.findOne({ 
+      where: { slug: req.query.genre, is_active: true }
+    });
+    
+    if (genre) {
+      console.log('✅ Found genre:', { id: genre.id, name: genre.name });
+      
+      // Dùng MovieGenre model đã import
+      const movieGenres = await MovieGenre.findAll({
+        where: { genre_id: genre.id },
+        attributes: ['movie_id']
+      });
+      
+      console.log(`📊 Found ${movieGenres.length} movie-genre relations`);
+      
+      if (movieGenres.length > 0) {
+        const movieIds = movieGenres.map(mg => mg.movie_id);
+        where.id = { [Op.in]: movieIds };
+        console.log(`🎬 Found ${movieIds.length} movies with this genre`);
+      } else {
+        console.log('🎬 No movies found with this genre');
+        return successResponse(res, {
+          movies: [],
+          pagination: getPagination(page, limit, 0)
+        });
+      }
+    } else {
+      console.log('❌ Genre not found with slug:', req.query.genre);
+      return successResponse(res, {
+        movies: [],
+        pagination: getPagination(page, limit, 0)
+      });
+    }
   }
 
-  // Filter theo quốc gia
+  // FILTER THEO QUỐC GIA
   if (req.query.country) {
-    include[1].where = { slug: req.query.country };
-    include[1].required = true;
+    console.log('🌍 Filtering by country slug:', req.query.country);
+    
+    const country = await Country.findOne({ 
+      where: { slug: req.query.country, is_active: true }
+    });
+    
+    if (country) {
+      console.log('✅ Found country:', { id: country.id, name: country.name });
+      
+      // Dùng MovieCountry model đã import
+      const movieCountries = await MovieCountry.findAll({
+        where: { country_id: country.id },
+        attributes: ['movie_id']
+      });
+      
+      console.log(`📊 Found ${movieCountries.length} movie-country relations`);
+      
+      if (movieCountries.length > 0) {
+        const countryMovieIds = movieCountries.map(mc => mc.movie_id);
+        
+        // Kết hợp với điều kiện genre nếu có
+        if (where.id && where.id[Op.in]) {
+          // Lấy giao của 2 mảng
+          const genreMovieIds = where.id[Op.in];
+          const intersection = genreMovieIds.filter(id => countryMovieIds.includes(id));
+          
+          if (intersection.length > 0) {
+            where.id = { [Op.in]: intersection };
+          } else {
+            return successResponse(res, {
+              movies: [],
+              pagination: getPagination(page, limit, 0)
+            });
+          }
+        } else {
+          where.id = { [Op.in]: countryMovieIds };
+        }
+      } else {
+        return successResponse(res, {
+          movies: [],
+          pagination: getPagination(page, limit, 0)
+        });
+      }
+    } else {
+      return successResponse(res, {
+        movies: [],
+        pagination: getPagination(page, limit, 0)
+      });
+    }
   }
 
-  // Filter theo năm
+  // FILTER THEO NĂM
   if (req.query.year) {
-    where.releaseYear = req.query.year;
+    where.release_year = req.query.year;
+    console.log('📅 Filtering by year:', req.query.year);
   }
 
-  // Filter theo loại phim
+  // FILTER THEO LOẠI PHIM
   if (req.query.type) {
     where.type = req.query.type;
+    console.log('🎬 Filtering by type:', req.query.type);
   }
 
-  // Filter theo chất lượng
+  // FILTER THEO CHẤT LƯỢNG
   if (req.query.quality) {
     where.quality = req.query.quality;
+    console.log('✨ Filtering by quality:', req.query.quality);
   }
 
-  // Filter theo trạng thái
+  // FILTER THEO TRẠNG THÁI
   if (req.query.status) {
     where.status = req.query.status;
+    console.log('📊 Filtering by status:', req.query.status);
   }
 
-  // Tìm kiếm
+  // TÌM KIẾM
   if (req.query.search) {
     where[Op.or] = [
       { title: { [Op.like]: `%${req.query.search}%` } },
-      { originalTitle: { [Op.like]: `%${req.query.search}%` } }
+      { original_title: { [Op.like]: `%${req.query.search}%` } }
     ];
+    console.log('🔍 Searching for:', req.query.search);
   }
 
-  // Sắp xếp
+  // SẮP XẾP
   let order = [];
   switch (req.query.sort) {
     case 'latest':
-      order = [['createdAt', 'DESC']];
+      order = [['created_at', 'DESC']];
       break;
     case 'popular':
-      order = [['viewCount', 'DESC']];
+      order = [['view_count', 'DESC']];
       break;
     case 'rating':
-      order = [['ratingAverage', 'DESC'], ['ratingCount', 'DESC']];
+      order = [['rating_average', 'DESC'], ['rating_count', 'DESC']];
       break;
     case 'title_asc':
       order = [['title', 'ASC']];
@@ -86,30 +199,47 @@ const getMovies = catchAsync(async (req, res) => {
       order = [['title', 'DESC']];
       break;
     case 'year_desc':
-      order = [['releaseYear', 'DESC']];
+      order = [['release_year', 'DESC']];
       break;
     case 'year_asc':
-      order = [['releaseYear', 'ASC']];
+      order = [['release_year', 'ASC']];
       break;
     default:
-      order = [['createdAt', 'DESC']];
+      order = [['created_at', 'DESC']];
   }
 
-  const { count, rows: movies } = await Movie.findAndCountAll({
-    where,
-    include,
-    order,
-    limit,
-    offset,
-    distinct: true
-  });
+  console.log('📊 WHERE clause:', JSON.stringify(where, null, 2));
+  console.log('📊 ORDER:', order);
 
-  const pagination = getPagination(page, limit, count);
-  
-  successResponse(res, {
-    movies: formatMoviesResponse(movies, req),
-    pagination
-  });
+  // THỰC HIỆN QUERY
+  try {
+    const { count, rows: movies } = await Movie.findAndCountAll({
+      where,
+      include,
+      order,
+      limit,
+      offset,
+      distinct: true
+    });
+
+    console.log(`📊 Found ${movies.length} movies (total: ${count})`);
+    
+    if (movies.length > 0) {
+      console.log('🎬 First movie:', movies[0].title);
+    } else {
+      console.log('⚠️ No movies found with criteria');
+    }
+
+    const pagination = getPagination(page, limit, count);
+    
+    successResponse(res, {
+      movies: formatMoviesResponse(movies, req),
+      pagination
+    });
+  } catch (error) {
+    console.error('❌ Error in getMovies:', error);
+    throw error;
+  }
 });
 
 // Lấy chi tiết phim
@@ -117,7 +247,7 @@ const getMovieDetail = catchAsync(async (req, res, next) => {
   const { slug } = req.params;
 
   const movie = await Movie.findOne({
-    where: { slug, isActive: true },
+    where: { slug, is_active: true },
     include: [
       { 
         model: Genre, 
@@ -152,43 +282,47 @@ const getMovieDetail = catchAsync(async (req, res, next) => {
 
   // Lấy danh sách tập
   const episodes = await Episode.findAll({
-    where: { movieId: movie.id, isActive: true },
-    order: [['episodeNumber', 'ASC']]
+    where: { movie_id: movie.id, is_active: true },
+    order: [['episode_number', 'ASC']]
   });
 
   // Lấy đánh giá của user
   let userRating = null;
   if (req.user) {
     const rating = await Rating.findOne({
-      where: { userId: req.user.id, movieId: movie.id }
+      where: { user_id: req.user.id, movie_id: movie.id }
     });
     userRating = rating ? rating.score : null;
   }
 
   // Lấy phim liên quan
-  const movieGenres = await sequelize.models.MovieGenre.findAll({
-    where: { movieId: movie.id },
-    attributes: ['genreId']
+  const movieGenres = await MovieGenre.findAll({
+    where: { movie_id: movie.id },
+    attributes: ['genre_id']
   });
-  const genreIds = movieGenres.map(mg => mg.genreId);
+  
+  const genreIds = movieGenres.map(mg => mg.genre_id);
 
-  const relatedMovies = await Movie.findAll({
-    where: {
-      id: { [Op.ne]: movie.id },
-      isActive: true
-    },
-    include: [
-      { 
-        model: Genre, 
-        as: 'genres', 
-        where: { id: { [Op.in]: genreIds } },
-        through: { attributes: [] },
-        required: true
-      }
-    ],
-    limit: 6,
-    distinct: true
-  });
+  let relatedMovies = [];
+  if (genreIds.length > 0) {
+    relatedMovies = await Movie.findAll({
+      where: {
+        id: { [Op.ne]: movie.id },
+        is_active: true
+      },
+      include: [
+        { 
+          model: Genre, 
+          as: 'genres', 
+          where: { id: { [Op.in]: genreIds } },
+          through: { attributes: [] },
+          required: true
+        }
+      ],
+      limit: 6,
+      distinct: true
+    });
+  }
 
   const movieData = formatMovieResponse(movie, req);
   successResponse(res, {
@@ -208,10 +342,10 @@ const incrementViewCount = catchAsync(async (req, res, next) => {
     return next(new AppError('Không tìm thấy phim', 404));
   }
 
-  movie.viewCount += 1;
+  movie.view_count += 1;
   await movie.save();
 
-  successResponse(res, { viewCount: movie.viewCount });
+  successResponse(res, { viewCount: movie.view_count });
 });
 
 // Lấy phim hot
@@ -219,7 +353,7 @@ const getPopularMovies = catchAsync(async (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
 
   const movies = await Movie.findAll({
-    where: { isActive: true },
+    where: { is_active: true },
     include: [
       { 
         model: Genre, 
@@ -228,7 +362,7 @@ const getPopularMovies = catchAsync(async (req, res) => {
         through: { attributes: [] }
       }
     ],
-    order: [['viewCount', 'DESC']],
+    order: [['view_count', 'DESC']],
     limit
   });
 
@@ -240,7 +374,7 @@ const getLatestMovies = catchAsync(async (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
 
   const movies = await Movie.findAll({
-    where: { isActive: true },
+    where: { is_active: true },
     include: [
       { 
         model: Genre, 
@@ -249,7 +383,7 @@ const getLatestMovies = catchAsync(async (req, res) => {
         through: { attributes: [] }
       }
     ],
-    order: [['createdAt', 'DESC']],
+    order: [['created_at', 'DESC']],
     limit
   });
 
@@ -261,7 +395,7 @@ const getFeaturedMovies = catchAsync(async (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
 
   const movies = await Movie.findAll({
-    where: { isActive: true, isFeatured: true },
+    where: { is_active: true, is_featured: true },
     include: [
       { 
         model: Genre, 
@@ -270,7 +404,7 @@ const getFeaturedMovies = catchAsync(async (req, res) => {
         through: { attributes: [] }
       }
     ],
-    order: [['createdAt', 'DESC']],
+    order: [['created_at', 'DESC']],
     limit
   });
 

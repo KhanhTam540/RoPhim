@@ -5,12 +5,13 @@ const AppError = require('../utils/AppError');
 
 // Đảm bảo thư mục upload tồn tại
 const uploadDir = process.env.UPLOAD_PATH || 'uploads';
-const subDirs = ['avatars', 'posters', 'videos'];
+const subDirs = ['avatars', 'posters', 'videos', 'sliders']; // THÊM 'sliders'
 
 subDirs.forEach(dir => {
   const dirPath = path.join(__dirname, '../../', uploadDir, dir);
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
+    console.log(`📁 Created directory: ${dirPath}`);
   }
 });
 
@@ -28,14 +29,20 @@ const storage = multer.diskStorage({
       subDir = 'posters';
     } else if (file.fieldname === 'video' || file.fieldname === 'videos') {
       subDir = 'videos';
+    } else if (file.fieldname === 'image') { // THÊM CHO SLIDER
+      subDir = 'sliders';
     }
     
-    cb(null, path.join(__dirname, '../../', uploadDir, subDir));
+    const uploadPath = path.join(__dirname, '../../', uploadDir, subDir);
+    console.log(`📁 Uploading to: ${uploadPath}`);
+    cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const ext = path.extname(file.originalname);
-    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+    const filename = file.fieldname + '-' + uniqueSuffix + ext;
+    console.log(`📁 Filename: ${filename}`);
+    cb(null, filename);
   }
 });
 
@@ -44,6 +51,8 @@ const fileFilter = (req, file, cb) => {
   const allowedTypes = /jpeg|jpg|png|gif|webp/;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = allowedTypes.test(file.mimetype);
+
+  console.log(`📁 File type: ${file.mimetype}, ext: ${path.extname(file.originalname)}`);
 
   if (mimetype && extname) {
     return cb(null, true);
@@ -72,7 +81,7 @@ const uploadFields = upload.fields([
   { name: 'poster', maxCount: 1 },
   { name: 'backdrop', maxCount: 1 },
   { name: 'avatar', maxCount: 1 },
-  { name: 'thumbnail', maxCount: 1 }
+  { name: 'image', maxCount: 1 } // THÊM CHO SLIDER
 ]);
 
 module.exports = {

@@ -1,4 +1,5 @@
 const { sequelize } = require('../config/database');
+const { DataTypes } = require('sequelize');
 const User = require('./User');
 const Movie = require('./Movie');
 const Genre = require('./Genre');
@@ -13,70 +14,271 @@ const Favorite = require('./Favorite');
 const History = require('./History');
 const Slider = require('./Slider');
 
-// User relationships
-User.hasMany(Rating, { foreignKey: 'userId', as: 'ratings' });
-User.hasMany(Comment, { foreignKey: 'userId', as: 'comments' });
-User.hasMany(Favorite, { foreignKey: 'userId', as: 'favorites' });
-User.hasMany(History, { foreignKey: 'userId', as: 'histories' });
+// ==================== ĐỊNH NGHĨA JUNCTION MODELS ====================
 
-// Movie relationships
+// MovieGenre Junction Model
+const MovieGenre = sequelize.define('MovieGenre', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  movie_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'movies',
+      key: 'id'
+    }
+  },
+  genre_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'genres',
+      key: 'id'
+    }
+  }
+}, {
+  tableName: 'movie_genres',
+  timestamps: true,
+  underscored: true,
+  indexes: [
+    {
+      unique: true,
+      fields: ['movie_id', 'genre_id']
+    }
+  ]
+});
+
+// MovieCountry Junction Model
+const MovieCountry = sequelize.define('MovieCountry', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  movie_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'movies',
+      key: 'id'
+    }
+  },
+  country_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'countries',
+      key: 'id'
+    }
+  }
+}, {
+  tableName: 'movie_countries',
+  timestamps: true,
+  underscored: true,
+  indexes: [
+    {
+      unique: true,
+      fields: ['movie_id', 'country_id']
+    }
+  ]
+});
+
+// MovieActor Junction Model
+const MovieActor = sequelize.define('MovieActor', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  movie_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'movies',
+      key: 'id'
+    }
+  },
+  actor_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'actors',
+      key: 'id'
+    }
+  }
+}, {
+  tableName: 'movie_actors',
+  timestamps: true,
+  underscored: true,
+  indexes: [
+    {
+      unique: true,
+      fields: ['movie_id', 'actor_id']
+    }
+  ]
+});
+
+// MovieDirector Junction Model
+const MovieDirector = sequelize.define('MovieDirector', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  movie_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'movies',
+      key: 'id'
+    }
+  },
+  director_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'directors',
+      key: 'id'
+    }
+  }
+}, {
+  tableName: 'movie_directors',
+  timestamps: true,
+  underscored: true,
+  indexes: [
+    {
+      unique: true,
+      fields: ['movie_id', 'director_id']
+    }
+  ]
+});
+
+// Log để kiểm tra
+console.log('📦 Models loaded:', {
+  User: !!User,
+  Movie: !!Movie,
+  Genre: !!Genre,
+  Country: !!Country,
+  Actor: !!Actor,
+  Director: !!Director,
+  Episode: !!Episode,
+  Rating: !!Rating,
+  Comment: !!Comment,
+  CommentLike: !!CommentLike,
+  Favorite: !!Favorite,
+  History: !!History,
+  Slider: !!Slider,
+  MovieGenre: !!MovieGenre,
+  MovieCountry: !!MovieCountry,
+  MovieActor: !!MovieActor,
+  MovieDirector: !!MovieDirector
+});
+
+// ==================== USER RELATIONSHIPS ====================
+User.hasMany(Rating, { foreignKey: 'user_id', as: 'ratings', onDelete: 'CASCADE' });
+User.hasMany(Comment, { foreignKey: 'user_id', as: 'comments', onDelete: 'CASCADE' });
+User.hasMany(Favorite, { foreignKey: 'user_id', as: 'favorites', onDelete: 'CASCADE' });
+User.hasMany(History, { foreignKey: 'user_id', as: 'histories', onDelete: 'CASCADE' });
+
+// ==================== MOVIE RELATIONSHIPS ====================
 Movie.belongsToMany(Genre, { 
-  through: 'MovieGenres', 
+  through: MovieGenre,  // SỬA: dùng model thay vì string
   as: 'genres',
-  foreignKey: 'movieId',
-  otherKey: 'genreId'
+  foreignKey: 'movie_id',
+  otherKey: 'genre_id'
 });
+
 Movie.belongsToMany(Country, { 
-  through: 'MovieCountries', 
+  through: MovieCountry,  // SỬA: dùng model thay vì string
   as: 'countries',
-  foreignKey: 'movieId',
-  otherKey: 'countryId'
+  foreignKey: 'movie_id',
+  otherKey: 'country_id'
 });
+
 Movie.belongsToMany(Actor, { 
-  through: 'MovieActors', 
+  through: MovieActor,  // SỬA: dùng model thay vì string
   as: 'actors',
-  foreignKey: 'movieId',
-  otherKey: 'actorId'
+  foreignKey: 'movie_id',
+  otherKey: 'actor_id'
 });
+
 Movie.belongsToMany(Director, { 
-  through: 'MovieDirectors', 
+  through: MovieDirector,  // SỬA: dùng model thay vì string
   as: 'directors',
-  foreignKey: 'movieId',
-  otherKey: 'directorId'
+  foreignKey: 'movie_id',
+  otherKey: 'director_id'
 });
-Movie.hasMany(Episode, { foreignKey: 'movieId', as: 'episodes' });
-Movie.hasMany(Rating, { foreignKey: 'movieId', as: 'ratings' });
-Movie.hasMany(Comment, { foreignKey: 'movieId', as: 'comments' });
-Movie.hasMany(Favorite, { foreignKey: 'movieId', as: 'favorites' });
-Movie.hasMany(History, { foreignKey: 'movieId', as: 'histories' });
 
-// Episode relationships
-Episode.belongsTo(Movie, { foreignKey: 'movieId', as: 'movie' });
+Movie.hasMany(Episode, { foreignKey: 'movie_id', as: 'episodes', onDelete: 'CASCADE' });
+Movie.hasMany(Rating, { foreignKey: 'movie_id', as: 'ratings', onDelete: 'CASCADE' });
+Movie.hasMany(Comment, { foreignKey: 'movie_id', as: 'comments', onDelete: 'CASCADE' });
+Movie.hasMany(Favorite, { foreignKey: 'movie_id', as: 'favorites', onDelete: 'CASCADE' });
+Movie.hasMany(History, { foreignKey: 'movie_id', as: 'histories', onDelete: 'CASCADE' });
 
-// Rating relationships
-Rating.belongsTo(User, { foreignKey: 'userId', as: 'user' });
-Rating.belongsTo(Movie, { foreignKey: 'movieId', as: 'movie' });
+// ==================== GENRE RELATIONSHIPS ====================
+Genre.belongsToMany(Movie, { 
+  through: MovieGenre,  // SỬA: dùng model thay vì string
+  as: 'movies',
+  foreignKey: 'genre_id',
+  otherKey: 'movie_id'
+});
 
-// Comment relationships
-Comment.belongsTo(User, { foreignKey: 'userId', as: 'user' });
-Comment.belongsTo(Movie, { foreignKey: 'movieId', as: 'movie' });
-Comment.hasMany(CommentLike, { foreignKey: 'commentId', as: 'likes' });
+// ==================== COUNTRY RELATIONSHIPS ====================
+Country.belongsToMany(Movie, { 
+  through: MovieCountry,  // SỬA: dùng model thay vì string
+  as: 'movies',
+  foreignKey: 'country_id',
+  otherKey: 'movie_id'
+});
 
-// CommentLike relationships
-CommentLike.belongsTo(Comment, { foreignKey: 'commentId', as: 'comment' });
-CommentLike.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+// ==================== ACTOR RELATIONSHIPS ====================
+Actor.belongsToMany(Movie, { 
+  through: MovieActor,  // SỬA: dùng model thay vì string
+  as: 'movies',
+  foreignKey: 'actor_id',
+  otherKey: 'movie_id'
+});
 
-// Favorite relationships
-Favorite.belongsTo(User, { foreignKey: 'userId', as: 'user' });
-Favorite.belongsTo(Movie, { foreignKey: 'movieId', as: 'movie' });
+// ==================== DIRECTOR RELATIONSHIPS ====================
+Director.belongsToMany(Movie, { 
+  through: MovieDirector,  // SỬA: dùng model thay vì string
+  as: 'movies',
+  foreignKey: 'director_id',
+  otherKey: 'movie_id'
+});
 
-// History relationships
-History.belongsTo(User, { foreignKey: 'userId', as: 'user' });
-History.belongsTo(Movie, { foreignKey: 'movieId', as: 'movie' });
-History.belongsTo(Episode, { foreignKey: 'episodeId', as: 'episode' });
+// ==================== EPISODE RELATIONSHIPS ====================
+Episode.belongsTo(Movie, { foreignKey: 'movie_id', as: 'movie', onDelete: 'CASCADE' });
 
-// Slider relationships
-Slider.belongsTo(Movie, { foreignKey: 'movieId', as: 'movie' });
+// ==================== RATING RELATIONSHIPS ====================
+Rating.belongsTo(User, { foreignKey: 'user_id', as: 'user', onDelete: 'CASCADE' });
+Rating.belongsTo(Movie, { foreignKey: 'movie_id', as: 'movie', onDelete: 'CASCADE' });
+
+// ==================== COMMENT RELATIONSHIPS ====================
+Comment.belongsTo(User, { foreignKey: 'user_id', as: 'user', onDelete: 'CASCADE' });
+Comment.belongsTo(Movie, { foreignKey: 'movie_id', as: 'movie', onDelete: 'CASCADE' });
+Comment.hasMany(CommentLike, { foreignKey: 'comment_id', as: 'likes', onDelete: 'CASCADE' });
+Comment.belongsTo(Comment, { foreignKey: 'parent_id', as: 'parent', onDelete: 'CASCADE' });
+Comment.hasMany(Comment, { foreignKey: 'parent_id', as: 'replies', onDelete: 'CASCADE' });
+
+// ==================== COMMENT LIKE RELATIONSHIPS ====================
+CommentLike.belongsTo(Comment, { foreignKey: 'comment_id', as: 'comment', onDelete: 'CASCADE' });
+CommentLike.belongsTo(User, { foreignKey: 'user_id', as: 'user', onDelete: 'CASCADE' });
+
+// ==================== FAVORITE RELATIONSHIPS ====================
+Favorite.belongsTo(User, { foreignKey: 'user_id', as: 'user', onDelete: 'CASCADE' });
+Favorite.belongsTo(Movie, { foreignKey: 'movie_id', as: 'movie', onDelete: 'CASCADE' });
+
+// ==================== HISTORY RELATIONSHIPS ====================
+History.belongsTo(User, { foreignKey: 'user_id', as: 'user', onDelete: 'CASCADE' });
+History.belongsTo(Movie, { foreignKey: 'movie_id', as: 'movie', onDelete: 'CASCADE' });
+History.belongsTo(Episode, { foreignKey: 'episode_id', as: 'episode', onDelete: 'CASCADE' });
+
+// ==================== SLIDER RELATIONSHIPS ====================
+Slider.belongsTo(Movie, { foreignKey: 'movie_id', as: 'movie', onDelete: 'SET NULL' });
 
 module.exports = {
   sequelize,
@@ -92,5 +294,9 @@ module.exports = {
   CommentLike,
   Favorite,
   History,
-  Slider
+  Slider,
+  MovieGenre,
+  MovieCountry,
+  MovieActor,
+  MovieDirector
 };

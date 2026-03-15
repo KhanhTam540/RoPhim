@@ -1,4 +1,3 @@
-// backend/controllers/genreController.js
 const { Genre } = require('../models');
 const catchAsync = require('../utils/catchAsync');
 const { successResponse } = require('../utils/responseHandler');
@@ -7,8 +6,8 @@ const AppError = require('../utils/AppError');
 // Lấy danh sách thể loại
 const getGenres = catchAsync(async (req, res) => {
   const genres = await Genre.findAll({
-    where: { is_active: true },  // SỬA: is_active thay vì isActive
-    attributes: ['id', 'name', 'slug', 'description'],
+    where: { is_active: true },  // SỬA: is_active
+    attributes: ['id', 'name', 'slug', 'description', 'icon'],
     order: [['name', 'ASC']]
   });
 
@@ -20,7 +19,7 @@ const getGenreBySlug = catchAsync(async (req, res, next) => {
   const { slug } = req.params;
 
   const genre = await Genre.findOne({
-    where: { slug, is_active: true }  // SỬA: is_active thay vì isActive
+    where: { slug, is_active: true }  // SỬA: is_active
   });
 
   if (!genre) {

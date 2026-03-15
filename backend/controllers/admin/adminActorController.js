@@ -1,3 +1,4 @@
+// backend/controllers/admin/adminActorController.js
 const { Actor, Movie } = require('../../models');
 const AppError = require('../../utils/AppError');
 const catchAsync = require('../../utils/catchAsync');
@@ -5,7 +6,7 @@ const { successResponse } = require('../../utils/responseHandler');
 const { deleteFile, getPagination } = require('../../utils/helpers');
 const { Op } = require('sequelize');
 
-// Lấy danh sách diễn viên (admin)
+// Lấy danh sách diễn viên
 const getAllActors = catchAsync(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 20;
@@ -13,27 +14,37 @@ const getAllActors = catchAsync(async (req, res) => {
 
   const where = {};
   
-  // Tìm kiếm
   if (req.query.search) {
     where.name = { [Op.like]: `%${req.query.search}%` };
   }
 
-  // Lọc theo quốc gia
   if (req.query.nationality) {
-    where.nationality = req.query.nationality;
+    where.nationality = { [Op.like]: `%${req.query.nationality}%` };
   }
 
   const { count, rows: actors } = await Actor.findAndCountAll({
     where,
     order: [['name', 'ASC']],
     limit,
-    offset
+    offset,
+    distinct: true
   });
+
+  // Đếm số phim cho mỗi diễn viên
+  const actorsWithCount = await Promise.all(
+    actors.map(async (actor) => {
+      const movieCount = await actor.countMovies();
+      return {
+        ...actor.toJSON(),
+        movieCount
+      };
+    })
+  );
 
   const pagination = getPagination(page, limit, count);
 
   successResponse(res, {
-    actors,
+    actors: actorsWithCount,
     pagination
   });
 });
@@ -46,9 +57,10 @@ const getActorById = catchAsync(async (req, res, next) => {
     include: [
       {
         model: Movie,
-        as: 'movies',
+        as: 'movies',  // Phải khớp với tên trong model
         attributes: ['id', 'title', 'slug', 'poster', 'releaseYear'],
-        through: { attributes: [] }
+        through: { attributes: [] },
+        required: false
       }
     ]
   });
@@ -64,8 +76,9 @@ const getActorById = catchAsync(async (req, res, next) => {
 const createActor = catchAsync(async (req, res, next) => {
   const actorData = req.body;
 
-  if (req.file) {
-    actorData.avatar = req.file.path.replace(/\\/g, '/').replace(/^.*?uploads/, 'uploads');
+  // Kiểm tra tên diễn viên
+  if (!actorData.name) {
+    return next(new AppError('Tên diễn viên không được để trống', 400));
   }
 
   const actor = await Actor.create(actorData);
@@ -83,14 +96,29 @@ const updateActor = catchAsync(async (req, res, next) => {
     return next(new AppError('Không tìm thấy diễn viên', 404));
   }
 
+  // Xử lý avatar nếu có
   if (req.file) {
-    if (actor.avatar) deleteFile(actor.avatar);
+    if (actor.avatar) {
+      deleteFile(actor.avatar);
+    }
     updateData.avatar = req.file.path.replace(/\\/g, '/').replace(/^.*?uploads/, 'uploads');
   }
 
   await actor.update(updateData);
 
-  successResponse(res, { actor }, 'Cập nhật diễn viên thành công');
+  // Lấy lại thông tin actor sau khi cập nhật
+  const updatedActor = await Actor.findByPk(actorId, {
+    include: [
+      {
+        model: Movie,
+        as: 'movies',
+        attributes: ['id', 'title', 'slug'],
+        through: { attributes: [] }
+      }
+    ]
+  });
+
+  successResponse(res, { actor: updatedActor }, 'Cập nhật diễn viên thành công');
 });
 
 // Xóa diễn viên
@@ -108,7 +136,11 @@ const deleteActor = catchAsync(async (req, res, next) => {
     return next(new AppError('Không thể xóa vì diễn viên đang có phim', 400));
   }
 
-  if (actor.avatar) deleteFile(actor.avatar);
+  // Xóa avatar nếu có
+  if (actor.avatar) {
+    deleteFile(actor.avatar);
+  }
+
   await actor.destroy();
 
   successResponse(res, null, 'Xóa diễn viên thành công');

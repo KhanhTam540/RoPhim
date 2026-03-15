@@ -25,12 +25,16 @@ app.use(cors({
 }));
 
 // Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Quá nhiều yêu cầu từ IP này, vui lòng thử lại sau 15 phút'
-});
-app.use('/api', limiter);
+if (process.env.NODE_ENV === 'production') {
+  const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: 'Quá nhiều yêu cầu từ IP này, vui lòng thử lại sau 15 phút'
+  });
+  app.use('/api', limiter);
+} else {
+  console.log('⚠️ Rate limiting disabled in development mode');
+}
 
 // Body parser
 app.use(express.json({ limit: '10mb' }));

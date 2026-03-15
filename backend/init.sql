@@ -215,7 +215,17 @@ INSERT INTO movies (title, slug, original_title, description, poster, backdrop, 
 (N'Dune 2', 'dune-2', 'Dune: Part Two', N'Paul Atreides tiếp tục cuộc chiến trên hành tinh Arrakis để giành lại vương quốc.', 'movies/dune2-poster.jpg', 'movies/dune2-backdrop.jpg', 2024, 166, 'single', 'ongoing', '4K UHD', N'Tiếng Anh', TRUE, 1200000, 4.8, 22000, 'https://youtube.com/dune2', 'https://example.com/dune2.mp4', TRUE),
 (N'Tiếng Yêu Này Anh Dịch Được Không?', 'tieng-yeu-nay-anh-dich-duoc-khong', 'Can This Love Be Translated?', N'Phim kể về Joo Ho-jin, một phiên dịch viên đa ngôn ngữ và Cha Mu-hee - minh tinh nổi tiếng.', 'movies/translate-love-poster.jpg', 'movies/translate-love-backdrop.jpg', 2026, NULL, 'series', 'ongoing', 'Full HD', N'Tiếng Hàn', TRUE, 200000, 4.6, 5000, 'https://youtube.com/translate-love', NULL, TRUE),
 (N'Hai Người Thân', 'hai-nguoi-than', 'Family by Choice', N'Hai người thân trong gia đình buộc phải cùng nhau nuôi dạy đứa cháu mồ côi.', 'movies/family-choice-poster.jpg', 'movies/family-choice-backdrop.jpg', 2025, NULL, 'series', 'ongoing', 'Full HD', N'Tiếng Hàn', TRUE, 300000, 4.5, 8000, 'https://youtube.com/family-choice', NULL, TRUE),
-(N'Phàn Trường Ngọc', 'phan-truong-ngoc', 'The Legend of the Condor Heroes', N'Câu chuyện về Phàn Trường Ngọc và cuộc phiêu lưu trong thế giới võ hiệp.', 'movies/phan-truong-ngoc-poster.jpg', 'movies/phan-truong-ngoc-backdrop.jpg', 2025, NULL, 'series', 'ongoing', 'Full HD', N'Tiếng Trung', TRUE, 400000, 4.5, 9000, 'https://youtube.com/phan-truong-ngoc', NULL, TRUE);
+(N'Phàn Trường Ngọc', 'phan-truong-ngoc', 'The Legend of the Condor Heroes', N'Câu chuyện về Phàn Trường Ngọc và cuộc phiêu lưu trong thế giới võ hiệp.', 'movies/phan-truong-ngoc-poster.jpg', 'movies/phan-truong-ngoc-backdrop.jpg', 2025, NULL, 'series', 'ongoing', 'Full HD', N'Tiếng Trung', TRUE, 400000, 4.5, 9000, 'https://youtube.com/phan-truong-ngoc', NULL, TRUE),
+-- PHIM CHIẾU RẠP MỚI
+(N'Mai', 'mai', 'Mai', N'Phim kể về Mai - một phụ nữ độc thân, đã ngoài 30 tuổi, làm nghề bán hủ tiếu gõ ở Sài Gòn. Cuộc sống của cô thay đổi khi gặp Dương - một chàng trai trẻ hơn 10 tuổi.', 'movies/mai-poster.jpg', 'movies/mai-backdrop.jpg', 2024, 131, 'single', 'ongoing', 'Full HD', N'Tiếng Việt', FALSE, 1200000, 4.7, 35000, 'https://youtube.com/mai', 'https://example.com/mai.mp4', TRUE),
+(N'Lật Mặt 7: Một Điều Ước', 'lat-mat-7-mot-dieu-uoc', 'Face Off 7: One Wish', N'Phim xoay quanh hành trình của những người xa lạ cùng thực hiện điều ước cho một cậu bé mắc bệnh hiểm nghèo.', 'movies/lat-mat-7-movie-poster.jpg', 'movies/lat-mat-7-movie-backdrop.jpg', 2024, 125, 'single', 'ongoing', 'Full HD', N'Tiếng Việt', FALSE, 600000, 4.5, 15000, 'https://youtube.com/lat-mat-7-movie', 'https://example.com/lat-mat-7-movie.mp4', TRUE),
+(N'Kung Fu Panda 4', 'kung-fu-panda-4', 'Kung Fu Panda 4', N'Po tiếp tục hành trình trở thành Thần Long Đại Hiệp và phải tìm kiếm người kế nhiệm. Anh gặp gỡ Zhen - một nữ chiến binh cáo tinh nghịch.', 'movies/kfp4-poster.jpg', 'movies/kfp4-backdrop.jpg', 2024, 94, 'single', 'ongoing', '4K UHD', N'Tiếng Anh', TRUE, 900000, 4.5, 28000, 'https://youtube.com/kungfupanda4', 'https://example.com/kfp4.mp4', TRUE),
+(N'Godzilla x Kong: Đế Chế Mới', 'godzilla-x-kong', 'Godzilla x Kong: The New Empire', N'Hai gã khổng lồ Godzilla và Kong phải hợp tác để chống lại một mối đe dọa chưa từng có.', 'movies/godzilla-kong-poster.jpg', 'movies/godzilla-kong-backdrop.jpg', 2024, 115, 'single', 'ongoing', '4K UHD', N'Tiếng Anh', TRUE, 1100000, 4.6, 32000, 'https://youtube.com/godzillakong', 'https://example.com/godzilla-kong.mp4', TRUE),
+(N'Quý Cô Tuyệt Vời', 'quy-co-tuyet-voi', 'Beautiful Lady', N'Phim hài lãng mạn Hàn Quốc kể về cô nàng luôn gặp xui xẻo trong tình yêu.', 'movies/beautiful-lady-poster.jpg', 'movies/beautiful-lady-backdrop.jpg', 2024, 110, 'single', 'ongoing', 'Full HD', N'Tiếng Hàn', TRUE, 400000, 4.3, 12000, 'https://youtube.com/beautifullady', 'https://example.com/beautiful-lady.mp4', FALSE),
+(N'Tiếng Yêu Này Anh Dịch Được Không? (Phim Điện Ảnh)', 'translate-love-movie', 'Can This Love Be Translated? (Movie)', N'Phiên bản điện ảnh của bộ phim truyền hình ăn khách.', 'movies/translate-love-movie-poster.jpg', 'movies/translate-love-movie-backdrop.jpg', 2025, 135, 'single', 'upcoming', '4K UHD', N'Tiếng Hàn', TRUE, 50000, 0, 0, 'https://youtube.com/translate-love-movie', NULL, TRUE),
+(N'Hai Người Thân (Phim Điện Ảnh)', 'family-by-choice-movie', 'Family by Choice (Movie)', N'Hai người thân trong gia đình buộc phải cùng nhau nuôi dạy đứa cháu mồ côi.', 'movies/family-choice-movie-poster.jpg', 'movies/family-choice-movie-backdrop.jpg', 2025, 128, 'single', 'upcoming', '4K UHD', N'Tiếng Hàn', TRUE, 30000, 0, 0, 'https://youtube.com/family-choice-movie', NULL, TRUE),
+(N'Phàn Trường Ngọc (Phim Điện Ảnh)', 'phan-truong-ngoc-movie', 'The Legend of the Condor Heroes (Movie)', N'Câu chuyện về Phàn Trường Ngọc và cuộc phiêu lưu trong thế giới võ hiệp.', 'movies/phan-truong-ngoc-movie-poster.jpg', 'movies/phan-truong-ngoc-movie-backdrop.jpg', 2025, 145, 'single', 'upcoming', '4K UHD', N'Tiếng Trung', TRUE, 200000, 0, 0, 'https://youtube.com/phantruongngoc', NULL, TRUE),
+(N'Bao Thanh Thiên', 'bao-thanh-thien', 'Justice Bao', N'Phiên bản điện ảnh về vị quan nổi tiếng Bao Thanh Thiên với tài xử án.', 'movies/bao-thanh-thien-poster.jpg', 'movies/bao-thanh-thien-backdrop.jpg', 2024, 140, 'single', 'ongoing', 'Full HD', N'Tiếng Trung', TRUE, 350000, 4.2, 10000, 'https://youtube.com/baothanhthien', 'https://example.com/bao-thanh-thien.mp4', FALSE);
 
 -- =====================================================
 -- TABLE: episodes
@@ -238,7 +248,7 @@ CREATE TABLE episodes (
     UNIQUE KEY unique_movie_episode (movie_id, episode_number)
 );
 
--- Insert episodes for Squid Game (movie_id = 9)
+-- Insert episodes for Vây Hãm (movie_id = 9)
 INSERT INTO episodes (movie_id, episode_number, title, description, duration, video_url, thumbnail, view_count, release_date) VALUES
 (9, 1, N'Đèn Đỏ, Đèn Xanh', N'456 người chơi tham gia trò chơi sinh tồn đầu tiên: Đèn đỏ, đèn xanh.', 60, 'https://example.com/squid-game-ep1.mp4', 'episodes/squid-game-ep1.jpg', 500000, '2021-09-17'),
 (9, 2, N'Địa Ngục', N'Những người chơi bỏ phiếu để dừng trò chơi, nhưng nhiều người quay lại.', 58, 'https://example.com/squid-game-ep2.mp4', 'episodes/squid-game-ep2.jpg', 480000, '2021-09-17'),
@@ -347,7 +357,11 @@ INSERT INTO comments (user_id, movie_id, content, created_at) VALUES
 (2, 12, N'Studio Ghibli không làm mình thất vọng.', '2024-07-01 14:30:00'),
 (3, 12, N'Hoạt hình đẹp, nội dung sâu sắc.', '2024-07-02 15:20:00'),
 (4, 13, N'Dune 2 hoành tráng hơn phần 1 nhiều!', '2024-08-01 18:30:00'),
-(5, 13, N'Visual đẹp mê hồn.', '2024-08-02 19:15:00');
+(5, 13, N'Visual đẹp mê hồn.', '2024-08-02 19:15:00'),
+(2, 17, N'Mai - phim hay nhất của Trấn Thành từ trước đến nay!', '2024-09-01 20:30:00'),
+(3, 18, N'Lật Mặt 7 cảm động quá!', '2024-09-05 21:15:00'),
+(4, 19, N'Kung Fu Panda 4 vui nhộn, cả nhà đều xem được.', '2024-09-10 19:30:00'),
+(5, 20, N'Godzilla x Kong hoành tráng, mãn nhãn!', '2024-09-15 22:00:00');
 
 -- Insert replies
 INSERT INTO comments (user_id, movie_id, parent_id, content, created_at) VALUES
@@ -386,7 +400,11 @@ INSERT INTO ratings (user_id, movie_id, score) VALUES
 (2, 10, 4), (3, 10, 5), (4, 10, 4), (5, 10, 4), (6, 10, 5),
 (2, 11, 4), (3, 11, 4), (4, 11, 5), (5, 11, 4), (6, 11, 4),
 (2, 12, 5), (3, 12, 5), (4, 12, 4), (5, 12, 5), (6, 12, 4),
-(2, 13, 5), (3, 13, 5), (4, 13, 4), (5, 13, 5), (6, 13, 5);
+(2, 13, 5), (3, 13, 5), (4, 13, 4), (5, 13, 5), (6, 13, 5),
+(2, 17, 5), (3, 17, 4), (4, 17, 5), (5, 17, 5),
+(2, 18, 4), (3, 18, 5), (4, 18, 4), (5, 18, 4),
+(2, 19, 5), (3, 19, 4), (4, 19, 4), (5, 19, 5),
+(2, 20, 5), (3, 20, 4), (4, 20, 5), (5, 20, 4);
 
 -- =====================================================
 -- TABLE: favorites
@@ -404,11 +422,11 @@ CREATE TABLE favorites (
 
 -- Insert favorites data
 INSERT INTO favorites (user_id, movie_id) VALUES
-(2, 1), (2, 3), (2, 5), (2, 7), (2, 9),
-(3, 2), (3, 4), (3, 6), (3, 8), (3, 10),
-(4, 1), (4, 3), (4, 5), (4, 7), (4, 9),
-(5, 2), (5, 4), (5, 6), (5, 8), (5, 10),
-(6, 1), (6, 3), (6, 5), (6, 7), (6, 9);
+(2, 1), (2, 3), (2, 5), (2, 7), (2, 9), (2, 17), (2, 19),
+(3, 2), (3, 4), (3, 6), (3, 8), (3, 10), (3, 18), (3, 20),
+(4, 1), (4, 3), (4, 5), (4, 7), (4, 9), (4, 17), (4, 19),
+(5, 2), (5, 4), (5, 6), (5, 8), (5, 10), (5, 18), (5, 20),
+(6, 1), (6, 3), (6, 5), (6, 7), (6, 9), (6, 17), (6, 19);
 
 -- =====================================================
 -- TABLE: histories
@@ -447,7 +465,11 @@ INSERT INTO histories (user_id, movie_id, episode_id, progress, completed, watch
 (6, 10, 2, 80, FALSE, '2024-05-12 19:15:00'),
 (2, 11, 1, 45, FALSE, '2024-06-10 20:00:00'),
 (3, 12, NULL, 100, TRUE, '2024-07-05 18:30:00'),
-(4, 13, NULL, 20, FALSE, '2024-08-10 21:45:00');
+(4, 13, NULL, 20, FALSE, '2024-08-10 21:45:00'),
+(2, 17, NULL, 100, TRUE, '2024-09-02 20:30:00'),
+(3, 18, NULL, 75, FALSE, '2024-09-06 21:00:00'),
+(4, 19, NULL, 50, FALSE, '2024-09-12 19:45:00'),
+(5, 20, NULL, 30, FALSE, '2024-09-16 22:15:00');
 
 -- =====================================================
 -- TABLE: sliders
@@ -460,6 +482,8 @@ CREATE TABLE sliders (
     link VARCHAR(500),
     `order` INT DEFAULT 0,
     description TEXT,
+    button_text VARCHAR(100),
+    button_link VARCHAR(500),
     is_active BOOLEAN DEFAULT TRUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -467,12 +491,15 @@ CREATE TABLE sliders (
 );
 
 -- Insert sliders data
-INSERT INTO sliders (title, image, movie_id, `order`, description) VALUES
-(N'Ký Sinh Trùng - Kiệt Tác Đoạt Oscar', 'sliders/parasite-slider.jpg', 1, 1, N'Phim Hàn Quốc đầu tiên đoạt giải Oscar cho Phim hay nhất'),
-(N'Avengers: Hồi Kết - Cuộc Chiến Cuối Cùng', 'sliders/avengers-slider.jpg', 4, 2, N'Bom tấn siêu anh hùng với doanh thu khủng nhất lịch sử'),
-(N'Vây Hãm - Trò Chơi Sinh Tồn', 'sliders/squid-game-slider.jpg', 9, 3, N'Series đình đám nhất Netflix với hơn 1 tỷ giờ xem'),
-(N'Joker - Vai Diễn Để Đời', 'sliders/joker-slider.jpg', 5, 4, N'Joaquin Phoenix giành Oscar cho vai diễn Joker'),
-(N'Chạy Đi Chờ Chi - Thảm Họa Zombie', 'sliders/train-to-busan-slider.jpg', 2, 5, N'Bộ phim zombie hay nhất xứ Hàn');
+INSERT INTO sliders (title, image, movie_id, `order`, description, button_text, button_link) VALUES
+(N'Ký Sinh Trùng - Kiệt Tác Đoạt Oscar', 'sliders/parasite-slider.jpg', 1, 1, N'Phim Hàn Quốc đầu tiên đoạt giải Oscar cho Phim hay nhất', 'Xem ngay', '/phim/ky-sinh-trung'),
+(N'Avengers: Hồi Kết - Cuộc Chiến Cuối Cùng', 'sliders/avengers-slider.jpg', 4, 2, N'Bom tấn siêu anh hùng với doanh thu khủng nhất lịch sử', 'Xem ngay', '/phim/avengers-hoi-ket'),
+(N'Vây Hãm - Trò Chơi Sinh Tồn', 'sliders/squid-game-slider.jpg', 9, 3, N'Series đình đám nhất Netflix với hơn 1 tỷ giờ xem', 'Xem ngay', '/phim/vay-ham'),
+(N'Joker - Vai Diễn Để Đời', 'sliders/joker-slider.jpg', 5, 4, N'Joaquin Phoenix giành Oscar cho vai diễn Joker', 'Xem ngay', '/phim/joker'),
+(N'Chạy Đi Chờ Chi - Thảm Họa Zombie', 'sliders/train-to-busan-slider.jpg', 2, 5, N'Bộ phim zombie hay nhất xứ Hàn', 'Xem ngay', '/phim/chay-di-cho-chi'),
+(N'Mai - Phim Hay Nhất Của Trấn Thành', 'sliders/mai-slider.jpg', 17, 6, N'Bộ phim Việt Nam đạt doanh thu cao nhất mọi thời đại', 'Đặt vé ngay', '/phim/mai'),
+(N'Dune 2 - Hành Tinh Cát', 'sliders/dune2-slider.jpg', 13, 7, N'Tác phẩm khoa học viễn tưởng hoành tráng nhất năm', 'Mua vé', '/phim/dune-2'),
+(N'Kung Fu Panda 4', 'sliders/kfp4-slider.jpg', 19, 8, N'Po trở lại với cuộc phiêu lưu mới', 'Xem trailer', '/phim/kung-fu-panda-4');
 
 -- =====================================================
 -- JUNCTION TABLES
@@ -493,7 +520,7 @@ CREATE TABLE movie_genres (
 -- Insert movie-genre relationships
 INSERT INTO movie_genres (movie_id, genre_id) VALUES
 (1, 2), (1, 8), (1, 11),  -- Ký Sinh Trùng: Tình cảm, Tâm lý, Phiêu lưu
-(2, 1), (2, 8), (2, 11), (2, 12),  -- Chạy Đi Chờ Chi: Hành động, Tâm lý, Phiêu lưu, Kinh dị
+(2, 1), (2, 8), (2, 11), (2, 4),  -- Chạy Đi Chờ Chi: Hành động, Tâm lý, Phiêu lưu, Kinh dị
 (3, 1), (3, 5), (3, 11),  -- Người Nhện: Hành động, Viễn tưởng, Phiêu lưu
 (4, 1), (4, 5), (4, 11),  -- Avengers: Hành động, Viễn tưởng, Phiêu lưu
 (5, 8), (5, 9),  -- Joker: Tâm lý, Hình sự
@@ -502,12 +529,21 @@ INSERT INTO movie_genres (movie_id, genre_id) VALUES
 (8, 2), (8, 8), (8, 7),  -- Đào Phở Piano: Tình cảm, Tâm lý, Cổ trang
 (9, 1), (9, 8), (9, 9), (9, 11),  -- Vây Hãm: Hành động, Tâm lý, Hình sự, Phiêu lưu
 (10, 2), (10, 8),  -- Chúng Ta Của 8 Năm Sau: Tình cảm, Tâm lý
-(11, 1), (11, 9),  -- Lật Mặt 7: Hành động, Hình sự
+(11, 1), (11, 9),  -- Lật Mặt 7 (series): Hành động, Hình sự
 (12, 6), (12, 11),  -- Thiếu Niên Và Diệc: Hoạt hình, Phiêu lưu
 (13, 1), (13, 5), (13, 11),  -- Dune 2: Hành động, Viễn tưởng, Phiêu lưu
 (14, 2), (14, 3),  -- Tiếng Yêu Này Anh Dịch Được Không?: Tình cảm, Hài hước
 (15, 2), (15, 8),  -- Hai Người Thân: Tình cảm, Tâm lý
-(16, 1), (16, 2), (16, 7), (16, 12);  -- Phàn Trường Ngọc: Hành động, Tình cảm, Cổ trang, Võ thuật
+(16, 1), (16, 2), (16, 7), (16, 12),  -- Phàn Trường Ngọc: Hành động, Tình cảm, Cổ trang, Võ thuật
+(17, 2), (17, 8),  -- Mai: Tình cảm, Tâm lý
+(18, 1), (18, 8), (18, 9),  -- Lật Mặt 7 movie: Hành động, Tâm lý, Hình sự
+(19, 6), (19, 3), (19, 11),  -- Kung Fu Panda 4: Hoạt hình, Hài hước, Phiêu lưu
+(20, 1), (20, 5), (20, 11),  -- Godzilla x Kong: Hành động, Viễn tưởng, Phiêu lưu
+(21, 2), (21, 3),  -- Quý Cô Tuyệt Vời: Tình cảm, Hài hước
+(22, 2), (22, 3),  -- Tiếng Yêu Này Anh Dịch Được Không? (movie): Tình cảm, Hài hước
+(23, 2), (23, 8),  -- Hai Người Thân (movie): Tình cảm, Tâm lý
+(24, 1), (24, 2), (24, 7), (24, 12),  -- Phàn Trường Ngọc (movie): Hành động, Tình cảm, Cổ trang, Võ thuật
+(25, 9), (25, 7);  -- Bao Thanh Thiên: Hình sự, Cổ trang
 
 -- Movie - Countries
 CREATE TABLE movie_countries (
@@ -533,12 +569,21 @@ INSERT INTO movie_countries (movie_id, country_id) VALUES
 (8, 1),  -- Đào Phở Piano: Việt Nam
 (9, 2),  -- Vây Hãm: Hàn Quốc
 (10, 2), -- Chúng Ta Của 8 Năm Sau: Hàn Quốc
-(11, 1), -- Lật Mặt 7: Việt Nam
+(11, 1), -- Lật Mặt 7 (series): Việt Nam
 (12, 3), -- Thiếu Niên Và Diệc: Nhật Bản
 (13, 6), -- Dune 2: Mỹ
-(14, 2), -- Tiếng Yêu Này Anh Dịch Được Không?: Hàn Quốc
-(15, 2), -- Hai Người Thân: Hàn Quốc
-(16, 4); -- Phàn Trường Ngọc: Trung Quốc
+(14, 2), -- Tiếng Yêu Này Anh Dịch Được Không? (series): Hàn Quốc
+(15, 2), -- Hai Người Thân (series): Hàn Quốc
+(16, 4), -- Phàn Trường Ngọc (series): Trung Quốc
+(17, 1), -- Mai: Việt Nam
+(18, 1), -- Lật Mặt 7 movie: Việt Nam
+(19, 6), -- Kung Fu Panda 4: Mỹ
+(20, 6), -- Godzilla x Kong: Mỹ
+(21, 2), -- Quý Cô Tuyệt Vời: Hàn Quốc
+(22, 2), -- Tiếng Yêu Này Anh Dịch Được Không? (movie): Hàn Quốc
+(23, 2), -- Hai Người Thân (movie): Hàn Quốc
+(24, 4), -- Phàn Trường Ngọc (movie): Trung Quốc
+(25, 4); -- Bao Thanh Thiên: Trung Quốc
 
 -- Movie - Actors
 CREATE TABLE movie_actors (
@@ -564,12 +609,21 @@ INSERT INTO movie_actors (movie_id, actor_id) VALUES
 (8, 1), (8, 7),  -- Đào Phở Piano: Lý Liên Kiệt, Thang Duy
 (9, 8), (9, 9), (9, 10),  -- Vây Hãm: Tống Huệ Kiều, Kim Soo Hyun, Jun Ji Hyun
 (10, 8), (10, 9),  -- Chúng Ta Của 8 Năm Sau: Tống Huệ Kiều, Kim Soo Hyun
-(11, 1), (11, 2),  -- Lật Mặt 7: Lý Liên Kiệt, Thành Long
+(11, 1), (11, 2),  -- Lật Mặt 7 (series): Lý Liên Kiệt, Thành Long
 (12, 3), (12, 4),  -- Thiếu Niên Và Diệc: Châu Tinh Trì, Lưu Đức Hoa
 (13, 5), (13, 6),  -- Dune 2: Lương Triều Vỹ, Trương Mạn Ngọc
-(14, 8), (14, 9),  -- Tiếng Yêu Này Anh Dịch Được Không?: Tống Huệ Kiều, Kim Soo Hyun
-(15, 7), (15, 10), -- Hai Người Thân: Thang Duy, Jun Ji Hyun
-(16, 1), (16, 2), (16, 3), (16, 4); -- Phàn Trường Ngọc: Lý Liên Kiệt, Thành Long, Châu Tinh Trì, Lưu Đức Hoa
+(14, 8), (14, 9),  -- Tiếng Yêu Này Anh Dịch Được Không? (series): Tống Huệ Kiều, Kim Soo Hyun
+(15, 7), (15, 10), -- Hai Người Thân (series): Thang Duy, Jun Ji Hyun
+(16, 1), (16, 2), (16, 3), (16, 4), -- Phàn Trường Ngọc (series): Lý Liên Kiệt, Thành Long, Châu Tinh Trì, Lưu Đức Hoa
+(17, 3), (17, 6),  -- Mai: Châu Tinh Trì, Trương Mạn Ngọc
+(18, 2), (18, 5),  -- Lật Mặt 7 movie: Thành Long, Lương Triều Vỹ
+(19, 3), (19, 7),  -- Kung Fu Panda 4: Châu Tinh Trì, Thang Duy
+(20, 5), (20, 8),  -- Godzilla x Kong: Lương Triều Vỹ, Tống Huệ Kiều
+(21, 9), (21, 10), -- Quý Cô Tuyệt Vời: Kim Soo Hyun, Jun Ji Hyun
+(22, 8), (22, 9),  -- Tiếng Yêu Này Anh Dịch Được Không? (movie): Tống Huệ Kiều, Kim Soo Hyun
+(23, 7), (23, 10), -- Hai Người Thân (movie): Thang Duy, Jun Ji Hyun
+(24, 1), (24, 2), (24, 4), -- Phàn Trường Ngọc (movie): Lý Liên Kiệt, Thành Long, Lưu Đức Hoa
+(25, 4), (25, 5), (25, 6); -- Bao Thanh Thiên: Lưu Đức Hoa, Lương Triều Vỹ, Trương Mạn Ngọc
 
 -- Movie - Directors
 CREATE TABLE movie_directors (
@@ -595,12 +649,21 @@ INSERT INTO movie_directors (movie_id, director_id) VALUES
 (8, 1),  -- Đào Phở Piano: Lý An
 (9, 6),  -- Vây Hãm: Bong Joon-ho
 (10, 5), -- Chúng Ta Của 8 Năm Sau: Park Chan-wook
-(11, 2), -- Lật Mặt 7: Trương Nghệ Mưu
+(11, 2), -- Lật Mặt 7 (series): Trương Nghệ Mưu
 (12, 4), -- Thiếu Niên Và Diệc: Vương Gia Vệ
 (13, 7), -- Dune 2: Christopher Nolan
-(14, 5), -- Tiếng Yêu Này Anh Dịch Được Không?: Park Chan-wook
-(15, 6), -- Hai Người Thân: Bong Joon-ho
-(16, 2); -- Phàn Trường Ngọc: Trương Nghệ Mưu
+(14, 5), -- Tiếng Yêu Này Anh Dịch Được Không? (series): Park Chan-wook
+(15, 6), -- Hai Người Thân (series): Bong Joon-ho
+(16, 2), -- Phàn Trường Ngọc (series): Trương Nghệ Mưu
+(17, 1), -- Mai: Lý An
+(18, 2), -- Lật Mặt 7 movie: Trương Nghệ Mưu
+(19, 4), -- Kung Fu Panda 4: Vương Gia Vệ
+(20, 7), -- Godzilla x Kong: Christopher Nolan
+(21, 5), -- Quý Cô Tuyệt Vời: Park Chan-wook
+(22, 5), -- Tiếng Yêu Này Anh Dịch Được Không? (movie): Park Chan-wook
+(23, 6), -- Hai Người Thân (movie): Bong Joon-ho
+(24, 2), -- Phàn Trường Ngọc (movie): Trương Nghệ Mưu
+(25, 4); -- Bao Thanh Thiên: Vương Gia Vệ
 
 -- Comment Likes
 CREATE TABLE comment_likes (
@@ -625,7 +688,10 @@ INSERT INTO comment_likes (comment_id, user_id) VALUES
 (7, 3), (7, 5), (7, 6),
 (8, 2), (8, 4), (8, 5),
 (9, 2), (9, 3), (9, 6),
-(10, 3), (10, 4), (10, 5);
+(10, 3), (10, 4), (10, 5),
+(31, 2), (31, 3), (31, 4),
+(32, 3), (32, 4), (32, 5),
+(33, 2), (33, 4), (33, 5);
 
 -- =====================================================
 -- CREATE USER AND GRANT PERMISSIONS
@@ -635,3 +701,24 @@ INSERT INTO comment_likes (comment_id, user_id) VALUES
 CREATE USER IF NOT EXISTS 'rophim_user'@'%' IDENTIFIED BY 'Rophim@2024';
 GRANT ALL PRIVILEGES ON rophim_db.* TO 'rophim_user'@'%';
 FLUSH PRIVILEGES;
+
+-- =====================================================
+-- VERIFICATION QUERIES
+-- =====================================================
+
+-- Count total records
+SELECT 'users' AS table_name, COUNT(*) AS total FROM users UNION ALL
+SELECT 'genres', COUNT(*) FROM genres UNION ALL
+SELECT 'countries', COUNT(*) FROM countries UNION ALL
+SELECT 'actors', COUNT(*) FROM actors UNION ALL
+SELECT 'directors', COUNT(*) FROM directors UNION ALL
+SELECT 'movies', COUNT(*) FROM movies UNION ALL
+SELECT 'episodes', COUNT(*) FROM episodes UNION ALL
+SELECT 'comments', COUNT(*) FROM comments UNION ALL
+SELECT 'ratings', COUNT(*) FROM ratings UNION ALL
+SELECT 'favorites', COUNT(*) FROM favorites UNION ALL
+SELECT 'histories', COUNT(*) FROM histories UNION ALL
+SELECT 'sliders', COUNT(*) FROM sliders;
+
+-- Show cinema movies
+SELECT id, title, release_year, status, quality FROM movies WHERE status IN ('ongoing', 'upcoming') ORDER BY release_year DESC;

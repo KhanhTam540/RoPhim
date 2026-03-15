@@ -8,7 +8,8 @@ const Slider = sequelize.define('Slider', {
     autoIncrement: true
   },
   title: {
-    type: DataTypes.STRING(255)
+    type: DataTypes.STRING(255),
+    allowNull: true
   },
   image: {
     type: DataTypes.STRING(255),
@@ -23,14 +24,20 @@ const Slider = sequelize.define('Slider', {
     }
   },
   link: {
-    type: DataTypes.STRING(500)
+    type: DataTypes.STRING(500),
+    allowNull: true
   },
   order: {
     type: DataTypes.INTEGER,
     defaultValue: 0
   },
   description: {
-    type: DataTypes.TEXT
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  buttonText: {
+    type: DataTypes.STRING(50),
+    defaultValue: 'Xem ngay'
   },
   isActive: {
     type: DataTypes.BOOLEAN,

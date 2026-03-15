@@ -22,7 +22,7 @@ const ActorForm = () => {
     birthDate: '',
     deathDate: '',
     nationality: '',
-    avatarUrl: '',
+    avatar: '',
     isActive: true,
   })
 
@@ -44,7 +44,7 @@ const ActorForm = () => {
         birthDate: actor.birthDate || '',
         deathDate: actor.deathDate || '',
         nationality: actor.nationality || '',
-        avatarUrl: actor.avatar || '',
+        avatar: actor.avatar || '',
         isActive: actor.isActive ?? true,
       })
     } catch (error) {
@@ -69,17 +69,11 @@ const ActorForm = () => {
     setSaving(true)
 
     try {
-      const actorData = {
-        ...formData,
-        avatar: formData.avatarUrl,
-      }
-      delete actorData.avatarUrl
-
       if (isEdit) {
-        await adminActorApi.updateActor(id, actorData)
+        await adminActorApi.updateActor(id, formData)
         toast.success('Cập nhật diễn viên thành công')
       } else {
-        await adminActorApi.createActor(actorData)
+        await adminActorApi.createActor(formData)
         toast.success('Thêm diễn viên thành công')
       }
       navigate('/admin/actors')
@@ -122,6 +116,7 @@ const ActorForm = () => {
                   onChange={handleChange}
                   className="input-field"
                   required
+                  placeholder="VD: Lý Liên Kiệt, Thành Long..."
                 />
               </div>
 
@@ -135,6 +130,7 @@ const ActorForm = () => {
                   value={formData.originalName}
                   onChange={handleChange}
                   className="input-field"
+                  placeholder="VD: Jet Li, Jackie Chan..."
                 />
               </div>
 
@@ -174,7 +170,7 @@ const ActorForm = () => {
                   value={formData.nationality}
                   onChange={handleChange}
                   className="input-field"
-                  placeholder="VD: Hàn Quốc, Mỹ..."
+                  placeholder="VD: Trung Quốc, Hàn Quốc..."
                 />
               </div>
 
@@ -184,19 +180,19 @@ const ActorForm = () => {
                 </label>
                 <input
                   type="url"
-                  name="avatarUrl"
-                  value={formData.avatarUrl}
+                  name="avatar"
+                  value={formData.avatar}
                   onChange={handleChange}
                   className="input-field"
                   placeholder="https://example.com/avatar.jpg"
                 />
-                {formData.avatarUrl && (
+                {formData.avatar && (
                   <div className="mt-2">
                     <img
-                      src={getImageUrl(formData.avatarUrl)}
+                      src={getImageUrl(formData.avatar)}
                       alt="Avatar preview"
                       className="w-20 h-20 rounded-full object-cover"
-                      onError={(e) => e.target.src = 'https://picsum.photos/150/150?random=3'}
+                      onError={(e) => e.target.style.display = 'none'}
                     />
                   </div>
                 )}
@@ -226,7 +222,7 @@ const ActorForm = () => {
                 name="isActive"
                 checked={formData.isActive}
                 onChange={handleChange}
-                className="rounded border-rophim-border bg-rophim-bg"
+                className="w-4 h-4 rounded border-rophim-border bg-rophim-bg text-blue-600"
               />
               <span>Kích hoạt</span>
             </label>
@@ -237,7 +233,7 @@ const ActorForm = () => {
             <button
               type="button"
               onClick={() => navigate('/admin/actors')}
-              className="btn-secondary flex items-center space-x-2"
+              className="btn-secondary flex items-center space-x-2 px-6 py-2"
             >
               <FaTimes size={16} />
               <span>Hủy</span>
@@ -245,7 +241,7 @@ const ActorForm = () => {
             <button
               type="submit"
               disabled={saving}
-              className="btn-primary flex items-center space-x-2"
+              className="btn-primary flex items-center space-x-2 px-6 py-2"
             >
               <FaSave size={16} />
               <span>{saving ? 'Đang lưu...' : 'Lưu'}</span>

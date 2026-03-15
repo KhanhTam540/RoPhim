@@ -1,8 +1,12 @@
 // src/components/MovieCard.jsx
 import { Link } from 'react-router-dom'
-import { FaPlay, FaStar, FaCalendar } from 'react-icons/fa'
+import { FaPlay, FaStar, FaCalendar, FaHeart, FaRegHeart } from 'react-icons/fa'
 import { motion } from 'framer-motion'
 import { getImageUrl } from '../utils/imageUtils'
+import { useFavorites } from '../context/FavoritesContext'
+import { useAuth } from '../context/AuthContext'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
 
 // Format rating safely
 const formatRating = (rating) => {
@@ -12,13 +16,33 @@ const formatRating = (rating) => {
 }
 
 const MovieCard = ({ movie }) => {
+  const { isFavorite, toggleFavorite } = useFavorites()
+  const { isAuthenticated } = useAuth()
+  const [isHovered, setIsHovered] = useState(false)
+  const [isImageError, setIsImageError] = useState(false)
+
   if (!movie) return null
 
   const rating = formatRating(movie.ratingAverage)
   const hasRating = rating !== '0.0' && movie.ratingCount > 0
+  const favorite = isFavorite(movie.id)
   
   // Get image URL with fallback
-  const posterUrl = movie.poster ? getImageUrl(movie.poster) : 'https://picsum.photos/300/450?random=1'
+  const posterUrl = movie.poster && !isImageError 
+    ? getImageUrl(movie.poster) 
+    : `https://via.placeholder.com/300x450?text=${encodeURIComponent(movie.title || 'No Image')}`
+
+  const handleFavoriteClick = async (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (!isAuthenticated) {
+      toast.error('Vui lòng đăng nhập để thêm vào yêu thích')
+      return
+    }
+
+    await toggleFavorite(movie.id)
+  }
 
   return (
     <motion.div
@@ -26,6 +50,8 @@ const MovieCard = ({ movie }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       className="relative group cursor-pointer"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <Link to={`/phim/${movie.slug || '#'}`}>
         <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-rophim-card">
@@ -35,9 +61,7 @@ const MovieCard = ({ movie }) => {
             alt={movie.title || 'Movie poster'}
             className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
             loading="lazy"
-            onError={(e) => {
-              e.target.src = 'https://picsum.photos/300/450?random=1'
-            }}
+            onError={() => setIsImageError(true)}
           />
           
           {/* Overlay */}
@@ -65,23 +89,37 @@ const MovieCard = ({ movie }) => {
             </div>
           </div>
 
+          {/* Favorite Button */}
+          <button
+            onClick={handleFavoriteClick}
+            className={`absolute top-2 right-2 p-2 rounded-full transition-all transform z-10 ${
+              isHovered ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
+            } ${
+              favorite
+                ? 'bg-red-600 text-white'
+                : 'bg-black/60 text-white hover:bg-red-600'
+            }`}
+          >
+            {favorite ? <FaHeart /> : <FaRegHeart />}
+          </button>
+
           {/* Play button */}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center transform hover:scale-110 transition-transform">
+            <div className="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center transform hover:scale-110 transition-transform">
               <FaPlay className="ml-1 text-white" />
             </div>
           </div>
 
           {/* Quality badge */}
           {movie.quality && (
-            <div className="absolute top-2 right-2 bg-blue-600 text-[10px] md:text-xs font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded">
+            <div className="absolute top-2 left-2 bg-blue-600 text-[10px] md:text-xs font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded z-10">
               {movie.quality}
             </div>
           )}
 
           {/* Type badge */}
           {movie.type === 'series' && (
-            <div className="absolute top-2 left-2 bg-purple-600 text-[10px] md:text-xs font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded">
+            <div className="absolute bottom-2 left-2 bg-purple-600 text-[10px] md:text-xs font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded z-10">
               Phim Bộ
             </div>
           )}

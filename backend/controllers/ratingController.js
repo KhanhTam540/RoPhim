@@ -1,3 +1,4 @@
+// backend/controllers/ratingController.js
 const { Rating, Movie, sequelize } = require('../models');
 const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
@@ -8,6 +9,8 @@ const rateMovie = catchAsync(async (req, res, next) => {
   const { movieId } = req.params;
   const { score } = req.body;
 
+  console.log('📝 Rating movie:', { movieId, score, userId: req.user?.id });
+
   if (score < 1 || score > 5) {
     return next(new AppError('Điểm đánh giá phải từ 1-5', 400));
   }
@@ -17,9 +20,12 @@ const rateMovie = catchAsync(async (req, res, next) => {
     return next(new AppError('Không tìm thấy phim', 404));
   }
 
-  // Tìm đánh giá cũ
+  // Tìm đánh giá cũ - SỬA: dùng user_id, movie_id
   let rating = await Rating.findOne({
-    where: { userId: req.user.id, movieId }
+    where: { 
+      user_id: req.user.id, 
+      movie_id: movieId 
+    }
   });
 
   if (rating) {
@@ -27,17 +33,17 @@ const rateMovie = catchAsync(async (req, res, next) => {
     rating.score = score;
     await rating.save();
   } else {
-    // Tạo mới
+    // Tạo mới - SỬA: dùng user_id, movie_id
     rating = await Rating.create({
-      userId: req.user.id,
-      movieId,
+      user_id: req.user.id,
+      movie_id: movieId,
       score
     });
   }
 
-  // Cập nhật rating trung bình của phim
+  // Cập nhật rating trung bình của phim - SỬA: dùng movie_id
   const stats = await Rating.findAll({
-    where: { movieId },
+    where: { movie_id: movieId },
     attributes: [
       [sequelize.fn('AVG', sequelize.col('score')), 'avgRating'],
       [sequelize.fn('COUNT', sequelize.col('id')), 'count']
@@ -48,8 +54,9 @@ const rateMovie = catchAsync(async (req, res, next) => {
   const avgRating = stats[0]?.avgRating || 0;
   const count = stats[0]?.count || 0;
 
-  movie.ratingAverage = Math.round(avgRating * 10) / 10;
-  movie.ratingCount = count;
+  // SỬA: dùng rating_average, rating_count
+  movie.rating_average = Math.round(avgRating * 10) / 10;
+  movie.rating_count = count;
   await movie.save();
 
   successResponse(res, {
@@ -58,11 +65,22 @@ const rateMovie = catchAsync(async (req, res, next) => {
 });
 
 // Lấy đánh giá của user
-const getUserRating = catchAsync(async (req, res) => {
+const getUserRating = catchAsync(async (req, res, next) => {
   const { movieId } = req.params;
 
+  console.log('📝 Getting user rating:', { movieId, userId: req.user?.id });
+
+  // Kiểm tra user đã đăng nhập chưa
+  if (!req.user) {
+    return successResponse(res, { score: null });
+  }
+
+  // SỬA: dùng user_id, movie_id
   const rating = await Rating.findOne({
-    where: { userId: req.user.id, movieId }
+    where: { 
+      user_id: req.user.id, 
+      movie_id: movieId 
+    }
   });
 
   successResponse(res, {

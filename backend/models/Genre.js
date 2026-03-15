@@ -23,20 +23,20 @@ const Genre = sequelize.define('Genre', {
   icon: {
     type: DataTypes.STRING(255)
   },
-  isActive: {
+  is_active: {  // QUAN TRỌNG: dùng is_active, không phải isActive
     type: DataTypes.BOOLEAN,
     defaultValue: true
   },
-  metaTitle: {
+  meta_title: {
     type: DataTypes.STRING(255)
   },
-  metaDescription: {
+  meta_description: {
     type: DataTypes.TEXT
   }
 }, {
   tableName: 'genres',
   timestamps: true,
-  underscored: true,
+  underscored: true,  // QUAN TRỌNG: tự động chuyển camelCase thành underscored
   hooks: {
     beforeCreate: async (genre) => {
       if (genre.name && !genre.slug) {

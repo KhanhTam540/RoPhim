@@ -39,46 +39,48 @@ const Dashboard = () => {
     loadDashboardData()
   }, [])
 
-  // src/pages/admin/Dashboard.jsx
-// Sửa hàm loadDashboardData
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true)
+      
+      // Sử dụng API tổng hợp để giảm số lượng request
+      const dashboardResponse = await adminStatsApi.getDashboardStats()
+      
+      // Nếu API tổng hợp chưa có, fallback sang các API riêng lẻ
+      if (dashboardResponse.data) {
+        setStats({
+          overview: dashboardResponse.data.overview || stats.overview,
+          topMovies: dashboardResponse.data.topMovies || [],
+          recentUsers: dashboardResponse.data.recentUsers || [],
+          dailyViews: dashboardResponse.data.dailyViews || [],
+          newUsers: dashboardResponse.data.newUsers || [],
+          genreStats: dashboardResponse.data.genreStats || [],
+        })
+      } else {
+        // Fallback: gọi từng API
+        const [overview, topMovies, dailyViews, newUsers, genreStats] = await Promise.all([
+          adminStatsApi.getOverview(),
+          adminStatsApi.getTopMovies(5),
+          adminStatsApi.getDailyViews(7).catch(() => ({ data: { views: [] } })),
+          adminStatsApi.getNewUsers(7).catch(() => ({ data: { users: [] } })),
+          adminStatsApi.getGenreStats().catch(() => ({ data: { stats: [] } })),
+        ])
 
-const loadDashboardData = async () => {
-  try {
-    setLoading(true)
-    const [overview, topMovies, dailyViews, newUsers, genreStats] = await Promise.all([
-      adminStatsApi.getOverview().catch(() => ({ 
-        data: { 
-          total: { movies: 0, users: 0, comments: 0, ratings: 0, views: 0 },
-          today: { movies: 0, users: 0, views: 0 },
-          week: { movies: 0, users: 0, views: 0 },
-          month: { movies: 0, users: 0, views: 0 }
-        } 
-      })),
-      adminStatsApi.getTopMovies(5).catch(() => ({ data: { movies: [] } })),
-      adminStatsApi.getDailyViews(7).catch(() => ({ data: { views: [] } })),
-      adminStatsApi.getNewUsers(7).catch(() => ({ data: { users: [] } })),
-      adminStatsApi.getGenreStats().catch(() => ({ data: { stats: [] } })),
-    ])
-
-    setStats({
-      overview: overview.data || {
-        total: { movies: 0, users: 0, comments: 0, ratings: 0, views: 0 },
-        today: { movies: 0, users: 0, views: 0 },
-        week: { movies: 0, users: 0, views: 0 },
-        month: { movies: 0, users: 0, views: 0 }
-      },
-      topMovies: topMovies.data?.movies || [],
-      dailyViews: dailyViews.data?.views || [],
-      newUsers: newUsers.data?.users || [],
-      genreStats: genreStats.data?.stats || [],
-      recentUsers: [],
-    })
-  } catch (error) {
-    console.error('Error loading dashboard:', error)
-  } finally {
-    setLoading(false)
+        setStats({
+          overview: overview.data || stats.overview,
+          topMovies: topMovies.data?.movies || [],
+          dailyViews: dailyViews.data?.views || [],
+          newUsers: newUsers.data?.users || [],
+          genreStats: genreStats.data?.stats || [],
+          recentUsers: [],
+        })
+      }
+    } catch (error) {
+      console.error('Error loading dashboard:', error)
+    } finally {
+      setLoading(false)
+    }
   }
-}
 
   const StatCard = ({ title, value, icon: Icon, trend, color = 'blue' }) => {
     const colorClasses = {

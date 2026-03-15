@@ -40,50 +40,40 @@ const UserList = () => {
     loadUsers()
   }, [pagination.page])
 
-  const loadUsers = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // SỬA TẠI ĐÂY: Chuẩn hóa tham số trước khi gửi
-      const params = {
-        page: pagination.page,
-        limit: pagination.limit,
-        search: filters.search || undefined,
-        role: filters.role || undefined,
-        // Nếu là chuỗi rỗng thì gửi undefined để Backend không lọc
-        isActive: filters.isActive === '' ? undefined : filters.isActive 
-      };
 
-      console.log('📥 Loading users with params:', params);
-      const response = await adminUserApi.getUsers(params);
-      
-      console.log('📦 Users response:', response);
-      
-      // SỬA TẠI ĐÂY: Truy cập vào response.data.data (do Backend dùng successResponse)
-      // Thêm kiểm tra dự phòng nếu axios của bạn đã map data rồi
-      const result = response.data?.data || response.data;
+const loadUsers = async () => {
+  try {
+    setLoading(true);
+    setError(null);
+    
+    const response = await adminUserApi.getUsers({
+      page: pagination.page,
+      limit: pagination.limit,
+      ...filters
+    });
+    
+    // Kiểm tra cấu trúc lồng nhau: response -> data (của axios) -> data (của backend)
+    const result = response.data?.data ? response.data.data : response.data;
 
-      if (result && result.users) {
-        setUsers(result.users);
-        setPagination(result.pagination || { 
-          page: 1, 
-          limit: 20, 
-          total: 0, 
-          pages: 1 
-        });
-      } else {
-        setUsers([]);
-        toast.error('Dữ liệu trả về không đúng định dạng');
-      }
-    } catch (error) {
-      console.error('❌ Error loading users:', error);
-      setError(error.message || 'Không thể tải danh sách người dùng');
-      toast.error(error.response?.data?.message || 'Lỗi kết nối server');
-    } finally {
-      setLoading(false);
+    if (result && result.users) {
+      setUsers(result.users);
+      setPagination(result.pagination || { 
+        page: 1, 
+        limit: 20, 
+        total: 0, 
+        pages: 1 
+      });
+    } else {
+      setUsers([]);
     }
+  } catch (error) {
+    console.error('❌ Error loading users:', error);
+    setError(error.response?.data?.message || 'Không thể tải danh sách người dùng');
+    toast.error('Không thể tải danh sách người dùng');
+  } finally {
+    setLoading(false);
   }
+};
 
   const handleSearch = () => {
     setPagination({ ...pagination, page: 1 })
@@ -234,7 +224,13 @@ const UserList = () => {
     {
       key: 'lastLogin',
       title: 'Lần cuối đăng nhập',
-      render: (date) => date ? formatDate(date) : 'Chưa đăng nhập'
+      render: (date) => {
+          // Kiểm tra nếu date tồn tại và không phải giá trị rỗng/null
+          if (date && date !== '0000-00-00 00:00:00') {
+            return formatDate(date);
+          }
+          return <span className="text-gray-500 italic">Chưa đăng nhập</span>;
+      }
     },
     {
       key: 'actions',
